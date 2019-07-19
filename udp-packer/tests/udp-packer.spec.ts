@@ -1,7 +1,6 @@
 import 'mocha';
 import * as fs from 'fs';
 import {UdpPacker} from "../src";
-import * as path from 'path';
 import * as chai from 'chai';
 
 describe('UdpPacker tests', () => {
@@ -11,9 +10,7 @@ describe('UdpPacker tests', () => {
 
     it('Should pack and exit', () => {
         const jpegBuffer = fs.readFileSync(jpegPath);
-        const udpPackets = udpPacker.pack(jpegBuffer);
-        // const newPath = path.join(path.dirname(jpegPath), 'husky2.jpg');
-        // console.log('Packets', udpPackets.length);
+        udpPacker.pack(jpegBuffer);
     });
 
     it ('Should create a valid header', () => {
@@ -45,9 +42,22 @@ describe('UdpPacker tests', () => {
     it ('Should maintain data integrity', () => {
         const jpegBuffer = fs.readFileSync(jpegPath);
         const udpPackets = udpPacker.pack(jpegBuffer);
+        console.log('UDP Packets', udpPackets.length);
 
-        let reconstructedBuffer = Buffer.from([]);
+        const firstPacket = udpPackets[0];
+        const firstData = udpPacker.extractData(firstPacket);
+        let expectedData = Buffer.from(jpegBuffer);
+        expectedData = expectedData.slice(0, firstData.length);
+        chai.assert.equal(firstData.toString('hex'), expectedData.toString('hex'));
 
-        
+        const secondPacket = udpPackets[1];
+        const secondData = udpPacker.extractData(secondPacket);
+        const secondActualData = jpegBuffer.slice(firstData.length, firstData.length + secondData.length);
+        chai.assert.equal(secondData.length, secondActualData.length);
+        chai.assert.equal(secondData.toString('hex'), secondActualData.toString('hex'));
+
+        const reconstructedData = udpPacker.unpackPackages(udpPackets);
+        console.log('Buffer length', reconstructedData.length);
+        chai.assert.equal(reconstructedData.toString('hex'), jpegBuffer.toString('hex'));
     });
 });
