@@ -1,9 +1,24 @@
-import {ImageDescriptor} from "./image-descriptor";
-import {PacketDescriptor} from "./packet-descriptor";
 import {UdpException} from "./udp-exception";
+import {ImageDescriptor, PacketDescriptor} from "./datatypes";
 
 const HEADER_DATA_OFFSET = 16;
 const REGULAR_DATA_OFFSET = 10;
+
+/**
+ * Header buffer contents:
+ * 8-byte ubigint le: unix timestamp ms - image unique identifier
+ * 2-byte uint le: page number (is 0)
+ * 2-byte uint le: number of pages
+ * 4-byte uint le: image size
+ * up to MAX_BUFFER_SIZE bytes - actual data
+ */
+
+/**
+ * Data buffer contents:
+ * 8-byte ubigint le: unix timestamp ms - image unique identifier
+ * 2-byte uint le: page number
+ * up to MAX_BUFFER_SIZE bytes - actual data
+ */
 
 
 export class UdpPacket {
@@ -37,6 +52,14 @@ export class UdpPacket {
         return new UdpPacket(Buffer.concat([headerBuffer, data]));
     }
 
+    static fromBuffer(buffer: Buffer) {
+        return new UdpPacket(buffer);
+    }
+
+    isHeaderPacket() {
+        return this.getPage() === 0;
+    }
+
     getImageDescriptor(): ImageDescriptor {
         const pageNumber = this.getPage();
         if (pageNumber !== 0) {
@@ -48,6 +71,10 @@ export class UdpPacket {
         const imageSize = this.buffer.readUInt32LE(12);
 
         return {timestamp, numberOfPages, imageSize};
+    }
+
+    getTimestamp(): bigint {
+        return this.buffer.readBigUInt64LE(0);
     }
 
     setNumberOfPages(nr: number) {

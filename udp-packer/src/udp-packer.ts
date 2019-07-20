@@ -1,30 +1,18 @@
 import {EventEmitter} from "events";
 import {UdpPacket} from "./udp-packet";
-import {ImageDescriptor} from "./image-descriptor";
-import {PacketDescriptor} from "./packet-descriptor";
+import {ImageDescriptor, PacketDescriptor, UdpPacketList} from "./datatypes";
 
 const MAX_BUFFER_SIZE = 1452;
 
-/**
- * Header buffer contents:
- * 8-byte ubigint le: unix timestamp ms - image unique identifier
- * 2-byte uint le: page number (is 0)
- * 2-byte uint le: number of pages
- * 4-byte uint le: image size
- * up to MAX_BUFFER_SIZE bytes - actual data
- */
-
-/**
- * Data buffer contents:
- * 8-byte ubigint le: unix timestamp ms - image unique identifier
- * 2-byte uint le: page number
- * up to MAX_BUFFER_SIZE bytes - actual data
- */
-
-
-
 
 export class UdpPacker extends EventEmitter {
+
+    private udpMap: Map<bigint, UdpPacketList>;
+
+    constructor() {
+        super();
+        this.udpMap = new Map();
+    }
 
 
     /**
@@ -47,7 +35,6 @@ export class UdpPacker extends EventEmitter {
         const dataBuffer = jpeg.slice(0, initialDataSize);
         const firstPacket = UdpPacket.headerPacket(imageDescriptor, dataBuffer);
         udpPackets.push(firstPacket);
-        // jpeg.copy(firstBuf, HEADER_DATA_OFFSET, 0, initialDataSize);
         let jpegOffset = initialDataSize;
         let page = 1;
         const writeSize = MAX_BUFFER_SIZE - UdpPacket.getDataPacketHeaderSize();
@@ -78,11 +65,29 @@ export class UdpPacker extends EventEmitter {
         return udpPackets;
     }
 
-    static unpackPackages(packets: UdpPacket[]) {
+    static unpackPackages(packets: UdpPacket[]): Buffer {
         return Buffer.concat(packets.map(x => x.getData()));
     }
 
-    public addForUnpack(buf: Buffer) {
+    addPacket(packet: UdpPacket) {
+        const timestamp = packet.getTimestamp();
+        let packetList: UdpPacketList|undefined = this.udpMap.get(timestamp);
+        if (packetList) {
+            packetList.packets.push(packet);
+        } else {
+           packetList = {packets: [packet]};
 
+           this.udpMap.set(timestamp, packetList);
+        }
+
+        if (!packetList.imageDescriptor && packet.isHeaderPacket()) {
+            packetList.imageDescriptor = packet.getImageDescriptor();
+        }
+
+        if (packetList.imageDescriptor && packetList.packets.length === packetList.imageDescriptor.numberOfPages) {
+            packetList.packets.sort((a, b) => a.getPage() - b.getPage());
+            this.emit('image', UdpPacker.unpackPackages(packetList.packets));
+            this.udpMap.delete(timestamp);
+        }
     }
 }
