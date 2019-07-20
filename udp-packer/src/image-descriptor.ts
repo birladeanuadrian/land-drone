@@ -7,5 +7,10 @@ export interface ImageDescriptor {
     /**
      * 2-byte unsigned int
      */
-    numberOfPage: number;
+    numberOfPages: number;
+
+    /**
+     * 8-byte unsigned bigint
+     */
+    timestamp: bigint;
 }

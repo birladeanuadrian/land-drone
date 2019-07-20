@@ -1,9 +1,9 @@
 import {EventEmitter} from "events";
 import {UdpPacket} from "./udp-packet";
+import {ImageDescriptor} from "./image-descriptor";
+import {PacketDescriptor} from "./packet-descriptor";
 
 const MAX_BUFFER_SIZE = 1452;
-const HEADER_DATA_OFFSET = 16;
-const REGULAR_DATA_OFFSET = 10;
 
 /**
  * Header buffer contents:
@@ -31,38 +31,41 @@ export class UdpPacker extends EventEmitter {
      * Returns an array of udp packets
      * @param jpeg
      */
-    public pack(jpeg: Buffer): Buffer[] {
+    static pack(jpeg: Buffer): UdpPacket[] {
         const now = new Date().getTime();
         const timestamp = BigInt(now);
-        const outBuffers = [];
+        const udpPackets: UdpPacket[] = [];
         const jpegSize = jpeg.length;
 
-        const firstBuf = Buffer.alloc(MAX_BUFFER_SIZE);
-        firstBuf.writeBigUInt64LE(timestamp);
-        firstBuf.writeUInt16LE(0, 8);
-        firstBuf.writeUInt32LE(jpeg.length, 12);
-        outBuffers.push(firstBuf);
-        const remainingSize = MAX_BUFFER_SIZE - HEADER_DATA_OFFSET;
-        jpeg.copy(firstBuf, HEADER_DATA_OFFSET, 0, remainingSize);
-        let jpegOffset = remainingSize;
+        const imageDescriptor: ImageDescriptor = {
+            imageSize: jpegSize,
+            numberOfPages: 0,
+            timestamp: timestamp
+        };
+
+        const initialDataSize = MAX_BUFFER_SIZE - UdpPacket.getHeaderPacketHeaderSize();
+        const dataBuffer = jpeg.slice(0, initialDataSize);
+        const firstPacket = UdpPacket.headerPacket(imageDescriptor, dataBuffer);
+        udpPackets.push(firstPacket);
+        // jpeg.copy(firstBuf, HEADER_DATA_OFFSET, 0, initialDataSize);
+        let jpegOffset = initialDataSize;
         let page = 1;
-        const writeSize = MAX_BUFFER_SIZE - REGULAR_DATA_OFFSET;
+        const writeSize = MAX_BUFFER_SIZE - UdpPacket.getDataPacketHeaderSize();
 
         while (true) {
             let end = jpegOffset + writeSize;
             if (end > jpegSize) {
                 end = jpegSize;
             }
-            const bufferSize = REGULAR_DATA_OFFSET + end - jpegOffset;
+            const bufferSize = end - jpegOffset;
             const newBuffer = Buffer.alloc(bufferSize);
-            newBuffer.writeBigUInt64LE(timestamp);
-            newBuffer.writeUInt16LE(page, 8);
-            page++;
 
-            jpeg.copy(newBuffer, REGULAR_DATA_OFFSET, jpegOffset, end);
-            const udpPacket = new UdpPacket(timestamp, page, newBuffer);
-            // console.log('Copy', jpegOffset, end, newBuffer);
-            outBuffers.push(newBuffer);
+
+            jpeg.copy(newBuffer, 0, jpegOffset, end);
+            const udpDescriptor: PacketDescriptor = {page, timestamp};
+            const udpPacket = UdpPacket.dataPacket(udpDescriptor, newBuffer);
+            page++;
+            udpPackets.push(udpPacket);
 
 
             if (end == jpegSize) {
@@ -71,27 +74,12 @@ export class UdpPacker extends EventEmitter {
                 jpegOffset = end;
             }
         }
-        firstBuf.writeUInt16LE(page, 10);
-        return outBuffers;
+        firstPacket.setNumberOfPages(page);
+        return udpPackets;
     }
 
-    public extractData(udpPackage: Buffer) {
-        const pageNumber = udpPackage.readUInt16LE(8);
-        if (pageNumber === 0) {
-            return Buffer.from(udpPackage).slice(HEADER_DATA_OFFSET);
-        } else {
-            return Buffer.from(udpPackage).slice(REGULAR_DATA_OFFSET);
-        }
-    }
-
-    public unpackPackages(buffers: Buffer[]) {
-        let dataBuffer = Buffer.alloc(0);
-
-        for (let buffer of buffers) {
-            dataBuffer = Buffer.concat([dataBuffer, this.extractData(buffer)]);
-        }
-
-        return dataBuffer;
+    static unpackPackages(packets: UdpPacket[]) {
+        return Buffer.concat(packets.map(x => x.getData()));
     }
 
     public addForUnpack(buf: Buffer) {
