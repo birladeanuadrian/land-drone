@@ -2,7 +2,6 @@ import {EventEmitter} from "events";
 import {UdpPacket} from "./udp-packet";
 import {ImageDescriptor, PacketDescriptor, UdpPacketList} from "./datatypes";
 
-const MAX_BUFFER_SIZE = 1452;
 
 
 export class UdpPacker extends EventEmitter {
@@ -31,13 +30,13 @@ export class UdpPacker extends EventEmitter {
             timestamp: timestamp
         };
 
-        const initialDataSize = MAX_BUFFER_SIZE - UdpPacket.getHeaderPacketHeaderSize();
+        const initialDataSize = UdpPacket.getMaxBufferSize() - UdpPacket.getHeaderPacketHeaderSize();
         const dataBuffer = jpeg.slice(0, initialDataSize);
         const firstPacket = UdpPacket.headerPacket(imageDescriptor, dataBuffer);
         udpPackets.push(firstPacket);
         let jpegOffset = initialDataSize;
         let page = 1;
-        const writeSize = MAX_BUFFER_SIZE - UdpPacket.getDataPacketHeaderSize();
+        const writeSize = UdpPacket.getMaxBufferSize() - UdpPacket.getDataPacketHeaderSize();
 
         while (true) {
             let end = jpegOffset + writeSize;

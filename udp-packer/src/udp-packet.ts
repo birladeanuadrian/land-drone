@@ -3,6 +3,8 @@ import {ImageDescriptor, PacketDescriptor} from "./datatypes";
 
 const HEADER_DATA_OFFSET = 16;
 const REGULAR_DATA_OFFSET = 10;
+const MAX_BUFFER_SIZE = 1452;
+
 
 /**
  * Header buffer contents:
@@ -34,6 +36,10 @@ export class UdpPacket {
 
     static getDataPacketHeaderSize() {
         return REGULAR_DATA_OFFSET;
+    }
+
+    static getMaxBufferSize() {
+        return MAX_BUFFER_SIZE;
     }
 
     static headerPacket(descriptor: ImageDescriptor, data: Buffer): UdpPacket {
@@ -88,6 +94,10 @@ export class UdpPacket {
         } else {
             return this.buffer.slice(REGULAR_DATA_OFFSET);
         }
+    }
+
+    getBuffer(): Buffer {
+        return this.buffer;
     }
 
     getPage() {

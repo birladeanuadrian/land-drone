@@ -76,6 +76,7 @@ describe('UdpPacker tests', () => {
         const jpegBuffer = fs.readFileSync(jpegPath);
         console.log('JPEG', jpegBuffer);
         const udpPackets = UdpPacker.pack(jpegBuffer);
+        console.log('Lengths', udpPackets[0].getData().length, udpPackets[1].getData().length);
 
         return new Promise((resolve, reject) => {
 
