@@ -1,7 +1,8 @@
 import 'mocha';
 import * as fs from 'fs';
-import {UdpPacker} from "../src";
+import {UdpPacker} from '../src';
 import * as chai from 'chai';
+import { EventEmitter } from 'events';
 
 function randomize(myArr: Array<any>) {
     let l = myArr.length, temp, index;
@@ -72,7 +73,8 @@ describe('UdpPacker tests', () => {
     });
 
     it ('Should pack and unpack image', () => {
-        const udpPacker = new UdpPacker();
+        const imageEmitter = new EventEmitter();
+        const udpPacker = new UdpPacker(imageEmitter);
         const jpegBuffer = fs.readFileSync(jpegPath);
         console.log('JPEG', jpegBuffer);
         const udpPackets = UdpPacker.pack(jpegBuffer);
@@ -80,7 +82,7 @@ describe('UdpPacker tests', () => {
 
         return new Promise((resolve, reject) => {
 
-            udpPacker.on('image', (newJpegBuffer: Buffer) => {
+            imageEmitter.on('image', (newJpegBuffer: Buffer) => {
                 console.log('Got an image', newJpegBuffer);
                 chai.assert.equal(newJpegBuffer.toString('hex'), jpegBuffer.toString('hex'));
                 resolve();
@@ -97,7 +99,8 @@ describe('UdpPacker tests', () => {
     });
 
     it ('Should pack, randomize and unpack image', () => {
-        const udpPacker = new UdpPacker();
+        const imageEmitter = new EventEmitter();
+        const udpPacker = new UdpPacker(imageEmitter);
         const jpegBuffer = fs.readFileSync(jpegPath);
         console.log('JPEG', jpegBuffer);
         let udpPackets = UdpPacker.pack(jpegBuffer);
@@ -106,7 +109,7 @@ describe('UdpPacker tests', () => {
 
         return new Promise((resolve, reject) => {
 
-            udpPacker.on('image', (newJpegBuffer: Buffer) => {
+            imageEmitter.on('image', (newJpegBuffer: Buffer) => {
                 console.log('Got an image', newJpegBuffer);
                 chai.assert.equal(newJpegBuffer.toString('hex'), jpegBuffer.toString('hex'));
                 resolve();

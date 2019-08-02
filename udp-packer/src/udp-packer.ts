@@ -1,16 +1,16 @@
-import {EventEmitter} from "events";
 import {UdpPacket} from "./udp-packet";
 import {ImageDescriptor, PacketDescriptor, UdpPacketList} from "./datatypes";
+import {ImageEmitter} from "./image-emitter";
 
 
+export class UdpPacker {
 
-export class UdpPacker extends EventEmitter {
+    private udpMap: Map<number, UdpPacketList>;
+    private imageEmitter: ImageEmitter;
 
-    private udpMap: Map<bigint, UdpPacketList>;
-
-    constructor() {
-        super();
+    constructor(imageEmitter: ImageEmitter) {
         this.udpMap = new Map();
+        this.imageEmitter = imageEmitter;
     }
 
 
@@ -19,8 +19,7 @@ export class UdpPacker extends EventEmitter {
      * @param jpeg
      */
     static pack(jpeg: Buffer): UdpPacket[] {
-        const now = new Date().getTime();
-        const timestamp = BigInt(now);
+        const timestamp = new Date().getTime();
         const udpPackets: UdpPacket[] = [];
         const jpegSize = jpeg.length;
 
@@ -85,7 +84,8 @@ export class UdpPacker extends EventEmitter {
 
         if (packetList.imageDescriptor && packetList.packets.length === packetList.imageDescriptor.numberOfPages) {
             packetList.packets.sort((a, b) => a.getPage() - b.getPage());
-            this.emit('image', UdpPacker.unpackPackages(packetList.packets));
+            const data = {timestamp: Number(packetList.packets[0].getTimestamp()), buffer: UdpPacker.unpackPackages(packetList.packets)};
+            this.imageEmitter.emit('image', data);
             this.udpMap.delete(timestamp);
         }
     }

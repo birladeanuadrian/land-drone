@@ -12,9 +12,6 @@ import {ImageReceiverService} from "./image-receiver.service";
   ],
   exports: [
     ImageViewerComponent
-  ],
-  providers: [
-    ImageReceiverService
   ]
 })
 export class ImageViewerModule { }

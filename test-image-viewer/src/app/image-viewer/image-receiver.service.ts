@@ -1,18 +1,15 @@
-import {EventEmitter, Injectable} from '@angular/core';
 import io from 'socket.io-client';
 import {Buffer} from 'buffer';
+import {UdpPacker, UdpPacket, ImageEmitter} from 'udp-packer';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class ImageReceiverService extends EventEmitter<Buffer> {
+export class ImageReceiverService {
 
   private socket: io.Socket;
-  private ready = false;
+  private udpPacker: UdpPacker;
 
-  constructor() {
-    super();
-    this.socket = io('http://127.0.0.1:5000');
+  constructor(imageEmitter: ImageEmitter) {
+    this.udpPacker = new UdpPacker(imageEmitter);
+    this.socket = io('http://127.0.0.1:8080');
     this.socket.on('connect', () => {
       console.log('Socket.IO connected');
     });
@@ -23,8 +20,8 @@ export class ImageReceiverService extends EventEmitter<Buffer> {
   }
 
   listen() {
-    this.socket.on('packet', data => {
-      console.log('Just received data', data.length);
+    this.socket.on('packet', (data) => {
+      this.udpPacker.addPacket(UdpPacket.fromBuffer(Buffer.from(data)));
     })
   }
 

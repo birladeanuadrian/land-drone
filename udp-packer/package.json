@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/birladeanuadrian/land-drone"
@@ -23,5 +24,6 @@
     "nyc": "^14.1.1",
     "ts-node": "^8.3.0",
     "typescript": "^3.5.3"
-  }
+  },
+  "dependencies": {}
 }

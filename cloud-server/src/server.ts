@@ -1,27 +1,23 @@
 import * as dgram from 'dgram';
-import * as http from 'http';
-import * as socketIo from 'socket.io';
+import express from 'express';
 import SocketIO from "socket.io";
+import cors from 'cors';
 
 const udpServer = dgram.createSocket('udp4');
-const httpServer = http.createServer();
-const io = SocketIO(httpServer);
-// io.set('origins', '');
+const app = express();
+app.use(cors());
 
-const ioSockets: SocketIO.Socket[] = [];
+const server = app.listen(8080, () => {
+    console.log('HTTP server running');
+});
+udpServer.bind(5000);
 
-const registerSocketListener = (socket: SocketIO.Socket) => {
-    ioSockets.push(socket);
-};
-
-const removeSocketListener = (socket: SocketIO.Socket) => {
-    const idx = ioSockets.indexOf(socket);
-    if (idx >= 0) {
-        ioSockets.splice(idx, 1);
-    }
-};
+const io = SocketIO(server, {
+    origins: "*:*",
+});
 
 const forwardUdpPacket = (buffer: Buffer) => {
+    console.log('forward', buffer);
     io.emit('packet', buffer);
 };
 
@@ -42,16 +38,8 @@ udpServer.on('listening', () => {
 
 io.on('connection', function(socket){
     console.log('a user connected');
-    registerSocketListener(socket);
 
     socket.on('disconnect', () => {
         console.log('User disconnected');
-        removeSocketListener(socket);
     })
 });
-
-udpServer.bind(5000);
-httpServer.listen(8080);
-// io.listen('0.0.0.0', {
-//    origins: '*:*'
-// });

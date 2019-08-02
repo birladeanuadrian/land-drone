@@ -13,14 +13,14 @@ export interface ImageDescriptor {
     /**
      * 8-byte unsigned bigint
      */
-    timestamp: bigint;
+    timestamp: number;
 }
 
 export interface PacketDescriptor {
     /**
      * 8-byte unsigned bigint
      */
-    timestamp: bigint;
+    timestamp: number;
 
     /**
      * 2-byte unsigned int
