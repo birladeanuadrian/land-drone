@@ -13,6 +13,7 @@ export class ImageViewerComponent implements OnInit {
   private imageReceiver: ImageReceiverService;
   private readonly angularImageEmitter: AngularImageEmitter;
   image = '';
+  delay = 0;
 
   constructor(private sanitizer: DomSanitizer) {
     this.angularImageEmitter = new AngularImageEmitter();
@@ -22,8 +23,8 @@ export class ImageViewerComponent implements OnInit {
 
   ngOnInit() {
     this.angularImageEmitter.on('image', data => {
-      const delay = new Date().getTime() - data.timestamp;
-      console.log('Delay', delay);
+      this.delay = new Date().getTime() - data.timestamp;
+      // console.log('Delay', delay);
       const imageData = "data:image/jpeg;base64," + data.buffer.toString('base64');
       this.sanitizer.bypassSecurityTrustUrl(imageData);
       this.image = imageData;

@@ -52,7 +52,6 @@ export class UdpPacker {
             page++;
             udpPackets.push(udpPacket);
 
-
             if (end == jpegSize) {
                 break;
             } else {
@@ -61,10 +60,6 @@ export class UdpPacker {
         }
         firstPacket.setNumberOfPages(page);
         return udpPackets;
-    }
-
-    static unpackPackages(packets: UdpPacket[]): Buffer {
-        return Buffer.concat(packets.map(x => x.getData()));
     }
 
     addPacket(packet: UdpPacket) {
@@ -84,7 +79,7 @@ export class UdpPacker {
 
         if (packetList.imageDescriptor && packetList.packets.length === packetList.imageDescriptor.numberOfPages) {
             packetList.packets.sort((a, b) => a.getPage() - b.getPage());
-            const data = {timestamp: Number(packetList.packets[0].getTimestamp()), buffer: UdpPacker.unpackPackages(packetList.packets)};
+            const data = {timestamp: packetList.packets[0].getTimestamp(), buffer: Buffer.concat(packetList.packets.map(x => x.getData()))};
             this.imageEmitter.emit('image', data);
             this.udpMap.delete(timestamp);
         }

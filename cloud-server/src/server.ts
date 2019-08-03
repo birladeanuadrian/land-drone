@@ -16,19 +16,13 @@ const io = SocketIO(server, {
     origins: "*:*",
 });
 
-const forwardUdpPacket = (buffer: Buffer) => {
-    console.log('forward', buffer);
-    io.emit('packet', buffer);
-};
-
 udpServer.on('error', err => {
     console.error('Server error: ' + err);
     udpServer.close();
 });
 
 udpServer.on('message', (msg, rinfo) => {
-    console.log(`Received message: ${msg.length} from `, rinfo);
-    forwardUdpPacket(msg);
+    io.emit('packet', msg);
 });
 
 udpServer.on('listening', () => {

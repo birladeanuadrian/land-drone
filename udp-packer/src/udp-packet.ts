@@ -3,7 +3,7 @@ import {ImageDescriptor, PacketDescriptor} from "./datatypes";
 
 const HEADER_DATA_OFFSET = 14;
 const REGULAR_DATA_OFFSET = 8;
-const MAX_BUFFER_SIZE = 1452;
+const MAX_BUFFER_SIZE = 410;
 
 
 /**

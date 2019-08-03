@@ -67,7 +67,7 @@ describe('UdpPacker tests', () => {
         chai.assert.equal(secondData.length, secondActualData.length);
         chai.assert.equal(secondData.toString('hex'), secondActualData.toString('hex'));
 
-        const reconstructedData = UdpPacker.unpackPackages(udpPackets);
+        const reconstructedData = Buffer.concat(udpPackets.map(x => x.getData()));
         console.log('Buffer length', reconstructedData.length);
         chai.assert.equal(reconstructedData.toString('hex'), jpegBuffer.toString('hex'));
     });

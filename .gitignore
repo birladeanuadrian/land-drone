@@ -5,3 +5,5 @@ udp-packer/tsconfig.tsbuildinfo
 cloud-server/node_modules/
 udp-packer/.nyc_output/
 cloud-server/.idea/
+cloud-server/tsconfig.tsbuildinfo
+cloud-server/dist/
