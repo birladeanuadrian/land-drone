@@ -24,6 +24,7 @@
     "socket.io": "^2.2.0",
     "socket.io-client": "^2.2.0",
     "tslib": "^1.9.0",
+    "udp-packer": "^1.0.0-rc1",
     "zone.js": "~0.9.1"
   },
   "devDependencies": {

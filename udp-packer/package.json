@@ -1,7 +1,7 @@
 {
   "name": "udp-packer",
   "version": "1.0.0",
-  "description": "",
+  "description": "This project apckages buffers into udp packets that can be transmitted over internet",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "repository": {
@@ -10,7 +10,8 @@
   },
   "scripts": {
     "compile": "tsc",
-    "test": "mocha -r ts-node/register ./tests/**/*.spec.ts"
+    "test": "mocha -r ts-node/register ./tests/**/*.spec.ts",
+    "prepublish": "tsc"
   },
   "keywords": [],
   "author": "",

@@ -82,9 +82,9 @@ describe('UdpPacker tests', () => {
 
         return new Promise((resolve, reject) => {
 
-            imageEmitter.on('image', (newJpegBuffer: Buffer) => {
-                console.log('Got an image', newJpegBuffer);
-                chai.assert.equal(newJpegBuffer.toString('hex'), jpegBuffer.toString('hex'));
+            imageEmitter.on('image', (data: {timestamp: number, buffer: Buffer}) => {
+                console.log('Got an image', data.buffer);
+                chai.assert.equal(data.buffer.toString('hex'), jpegBuffer.toString('hex'));
                 resolve();
             });
 
@@ -109,9 +109,9 @@ describe('UdpPacker tests', () => {
 
         return new Promise((resolve, reject) => {
 
-            imageEmitter.on('image', (newJpegBuffer: Buffer) => {
-                console.log('Got an image', newJpegBuffer);
-                chai.assert.equal(newJpegBuffer.toString('hex'), jpegBuffer.toString('hex'));
+            imageEmitter.on('image', (data: {timestamp: number, buffer: Buffer}) => {
+                console.log('Got an image', data.buffer);
+                chai.assert.equal(data.buffer.toString('hex'), jpegBuffer.toString('hex'));
                 resolve();
             });
 
