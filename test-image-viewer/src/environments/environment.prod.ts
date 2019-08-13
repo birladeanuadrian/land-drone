@@ -1,3 +1,4 @@
 export const environment = {
-  production: true
+  production: true,
+  ioServer: 'adibir.sytes.net:8080',
 };

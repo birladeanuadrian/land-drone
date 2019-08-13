@@ -3,7 +3,8 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  ioServer: 'http://35.246.223.154:8080',
 };
 
 /*

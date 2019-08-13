@@ -7,3 +7,7 @@ udp-packer/.nyc_output/
 cloud-server/.idea/
 cloud-server/tsconfig.tsbuildinfo
 cloud-server/dist/
+image-receiver/tsconfig.tsbuildinfo
+image-receiver/.idea/
+image-receiver/dist/
+image-receiver/node_modules/
