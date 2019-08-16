@@ -1,7 +1,7 @@
 {
   "name": "udp-packer",
-  "version": "1.0.0",
-  "description": "This project apckages buffers into udp packets that can be transmitted over internet",
+  "version": "1.1.0",
+  "description": "This project packages buffers into udp packets that can be transmitted over internet",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "repository": {
