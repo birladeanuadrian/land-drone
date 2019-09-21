@@ -11,3 +11,13 @@ image-receiver/tsconfig.tsbuildinfo
 image-receiver/.idea/
 image-receiver/dist/
 image-receiver/node_modules/
+drone-posix/.idea/
+drone-posix/cpp/.idea/
+drone-posix/cpp/cmake-build-debug/
+drone-posix/node_modules/
+inner-comms/dist/
+inner-comms/node_modules/
+inner-comms/.idea/
+drone-posix/cmake-build-debug/
+*.tsbuildinfo
+motor-control/.idea/

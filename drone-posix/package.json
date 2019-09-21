@@ -1,0 +1,15 @@
+{
+  "name": "drone-posix",
+  "version": "1.0.0",
+  "description": "IPC for drone level components based on POSIX queues",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^3.5.3"
+  }
+}
