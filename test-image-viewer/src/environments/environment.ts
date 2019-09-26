@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  ioServer: 'http://35.246.223.154:8080',
+  ioServer: 'http://127.0.0.1:8080',
 };
 
 /*

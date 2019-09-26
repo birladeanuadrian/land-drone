@@ -9,5 +9,5 @@ class Motor:
         self.throttle = 0
 
     def move(self, throttle):
-        self.throttle = throttle
+        self.throttle = throttle * self.forward_direction
         self.motor.throttle = self.throttle

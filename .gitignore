@@ -21,3 +21,7 @@ inner-comms/.idea/
 drone-posix/cmake-build-debug/
 *.tsbuildinfo
 motor-control/.idea/
+outer-comms/node_modules/
+outer-comms/.idea/
+outer-comms/dist/
+python-inner-comms/.idea/

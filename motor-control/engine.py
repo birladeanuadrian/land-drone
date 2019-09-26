@@ -16,16 +16,19 @@ class Engine:
         self.all_motors = [self.motor1, self.motor2, self.motor3, self.motor4]
 
     def forward(self, throttle):
+        print('Forward', throttle)
         self.throttle = throttle
         for motor in self.all_motors:
             motor.move(self.throttle)
 
     def reverse(self, throttle):
+        print('Reverse', throttle)
         self.throttle = -1 * throttle
         for motor in self.all_motors:
             motor.move(self.throttle)
 
     def steer(self, direction):
+        print('Steer', direction)
         """
         :param direction:
             -1 -> left
@@ -48,5 +51,6 @@ class Engine:
         self.motor2.move(self.throttle * intensity)
 
     def stop(self):
+        print('Stop')
         for motor in self.all_motors:
             motor.move(0)
