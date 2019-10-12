@@ -6,6 +6,8 @@ import cors from 'cors';
 const udpServer = dgram.createSocket('udp4');
 const app = express();
 app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded());
 
 const server = app.listen(8080, () => {
     console.log('HTTP server running');
@@ -22,6 +24,7 @@ udpServer.on('error', err => {
 });
 
 udpServer.on('message', (msg, rinfo) => {
+    // console.log('Packet received', msg.length);
     io.emit('packet', msg);
 });
 
@@ -36,4 +39,20 @@ io.on('connection', function(socket){
     socket.on('disconnect', () => {
         console.log('User disconnected');
     })
+});
+
+io.on('control-message', (msg: any) => {
+    io.emit('drone-control', msg);
+});
+
+app.get('/', (req, res) => {
+    res.send('Ok');
+});
+
+app.post('/control', (req, res) => {
+    const acceleration: number = req.body.acceleration;
+    const direction = req.body.direction;
+
+    io.emit('control', JSON.stringify({acceleration, direction}));
+    res.json({ok: 1});
 });

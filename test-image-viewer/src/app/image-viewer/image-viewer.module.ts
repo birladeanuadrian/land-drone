@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ImageViewerComponent } from './image-viewer.component';
-import {ImageReceiverService} from "./image-receiver.service";
 
 
 

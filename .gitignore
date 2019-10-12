@@ -25,3 +25,7 @@ outer-comms/node_modules/
 outer-comms/.idea/
 outer-comms/dist/
 python-inner-comms/.idea/
+drone-node/node_modules/
+drone-python/.idea/
+drone-node/dist/
+drone-node/.idea/

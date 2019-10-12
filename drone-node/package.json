@@ -1,0 +1,32 @@
+{
+  "name": "inner-comms",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "mocha -r ts-node/register ./tests/**/*.spec.ts",
+    "compile": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/amqplib": "^0.5.13",
+    "@types/debug": "^4.1.5",
+    "@types/mocha": "^5.2.7",
+    "@types/socket.io-client": "^1.4.32",
+    "chai": "^4.2.0",
+    "mocha": "^6.2.0",
+    "ts-node": "^8.4.1",
+    "typescript": "^3.6.3"
+  },
+  "dependencies": {
+    "amqplib": "^0.5.5",
+    "debug": "^4.1.1",
+    "opencv4nodejs": "^5.3.0",
+    "pi-camera-connect": "^0.2.0",
+    "socket.io-client": "^2.3.0",
+    "udp-packer": "^1.1.2"
+  }
+}

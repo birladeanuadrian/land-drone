@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import {ImageReceiverService} from "./image-receiver.service";
 import {AngularImageEmitter} from "./angular-image-emitter";
 import {DomSanitizer} from "@angular/platform-browser";
+import {CloudSocket} from "../shared/servies/cloud-socket";
 
 @Component({
   selector: 'app-image-viewer',
@@ -10,14 +10,14 @@ import {DomSanitizer} from "@angular/platform-browser";
 })
 export class ImageViewerComponent implements OnInit {
 
-  private imageReceiver: ImageReceiverService;
+  private imageReceiver: CloudSocket;
   private readonly angularImageEmitter: AngularImageEmitter;
   image = '';
   delay = 0;
 
   constructor(private sanitizer: DomSanitizer) {
     this.angularImageEmitter = new AngularImageEmitter();
-    this.imageReceiver = new ImageReceiverService(this.angularImageEmitter);
+    this.imageReceiver = new CloudSocket(this.angularImageEmitter);
     this.imageReceiver.listen();
   }
 

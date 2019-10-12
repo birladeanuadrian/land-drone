@@ -1,9 +1,10 @@
 import io from 'socket.io-client';
 import {Buffer} from 'buffer';
 import {UdpPacker, UdpPacket, ImageEmitter} from 'udp-packer';
-import {environment} from "../../environments/environment";
+// import {environment} from "../../environments/environment";
+import {environment} from "../../../environments/environment";
 
-export class ImageReceiverService {
+export class CloudSocket {
 
   private socket: io.Socket;
   private udpPacker: UdpPacker;
@@ -25,6 +26,10 @@ export class ImageReceiverService {
     this.socket.on('packet', (data) => {
       this.udpPacker.addPacket(UdpPacket.fromBuffer(Buffer.from(data)));
     })
+  }
+
+  sendCommand() {
+
   }
 
 

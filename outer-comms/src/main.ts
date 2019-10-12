@@ -3,11 +3,13 @@ import {UdpPacker} from "udp-packer";
 import * as dgram from 'dgram';
 import Debug from 'debug';
 import {Codec, StillCamera, StreamCamera, } from 'pi-camera-connect';
+import io from 'socket.io-client';
 
 const debug = Debug('app');
 const SERVER_IP = '192.168.0.122';
 const socket = dgram.createSocket('udp4');
 const devicePort = 0;
+const ioSocket = io(SERVER_IP);
 // const streamCamera = new StreamCamera({
 //     width: 600,
 //     height: 400,

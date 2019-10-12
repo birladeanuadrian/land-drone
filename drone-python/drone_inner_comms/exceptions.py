@@ -1,0 +1,4 @@
+
+
+class CommsException(Exception):
+    pass
