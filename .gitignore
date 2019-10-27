@@ -30,3 +30,8 @@ drone-python/.idea/
 drone-node/dist/
 drone-node/.idea/
 face-detection/.idea/
+face-detection/__pycache__/
+face-detection/faced/__pycache__/
+face-detection/models/
+face-detection/big_bang_12_04.mp4
+face-detection/faced/models/
