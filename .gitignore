@@ -35,3 +35,8 @@ face-detection/faced/__pycache__/
 face-detection/models/
 face-detection/big_bang_12_04.mp4
 face-detection/faced/models/
+*.pyc
+face_detection/models/
+face_detection/.idea/
+*.mp4
+face_detection/faced/models/
