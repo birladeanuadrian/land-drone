@@ -9,8 +9,18 @@ import numpy as np
 import tensorflow as tf
 import cv2
 import time
+import queue
+
+import threading
 from utils import *
 from imutils.video import VideoStream
+from typing import List
+from logger import logger
+
+
+INTERSECTION_THRESHOLD = 0.65
+RESET_THRESHOLD = 0.75
+faces_queue = queue.Queue()
 
 
 class DetectorAPI:
@@ -37,10 +47,10 @@ class DetectorAPI:
         self.detection_scores = self.detection_graph.get_tensor_by_name('detection_scores:0')
         self.detection_classes = self.detection_graph.get_tensor_by_name('detection_classes:0')
         self.num_detections = self.detection_graph.get_tensor_by_name('num_detections:0')
-        print('Detection boxes', self.detection_boxes)
-        print('Detection scores', self.detection_scores)
-        print('Detection classes', self.detection_classes)
-        print('Num detections', self.num_detections)
+        logger.info('Detection boxes', self.detection_boxes)
+        logger.info('Detection scores', self.detection_scores)
+        logger.info('Detection classes', self.detection_classes)
+        logger.info('Num detections', self.num_detections)
 
     def process_frame(self, image):
         # Expand dimensions since the trained_model expects images to have shape: [1, None, None, 3]
@@ -52,7 +62,7 @@ class DetectorAPI:
             feed_dict={self.image_tensor: image_np_expanded})
         local_end_time = time.time()
 
-        # print("Elapsed Time:", local_end_time-local_start_time)
+        # logger.info("Elapsed Time:", local_end_time-local_start_time)
 
         im_height, im_width, _ = image.shape
         boxes_list = [None for i in range(boxes.shape[1])]
@@ -70,80 +80,145 @@ class DetectorAPI:
         self.default_graph.close()
 
 
+def queue_consume():
+    while True:
+        user_info: UserIdentity = faces_queue.get(True)
+        print(user_info.cropped_box)
+        cv2.imshow('Person {}'.format(user_info.user_id), user_info.cropped_box)
+        key = cv2.waitKey(1)
+        if key & 0xFF == ord('q'):
+            break
+
+
 def main():
     # model_path = 'models/faster_rcnn_inception_v2_coco_2018_01_28/frozen_inference_graph.pb'
     # model_path = 'models/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb'
     model_path = 'models/ssdlite_mobilenet_v2_coco_2018_05_09/frozen_inference_graph.pb'
     odapi = DetectorAPI(path_to_ckpt=model_path)
-    threshold = 0.5
+    threshold = 0.7
 
     # cap = cv2.VideoCapture('big_bang_12_04.mp4')
     # cap = VideoStream('big_bang_12_04.mp4').start()
     # cap = cv2.VideoCapture(0)
-    video_file = 'd:\\Work\\nonGit\\multi-object-tracking\\videos\\soccer_01.mp4'
-    # video_file = 'd:\\Work\\nonGit\\multi-object-tracking\\videos\\los_angeles.mp4'
+    # video_file = 'd:\\Work\\nonGit\\multi-object-tracking\\videos\\soccer_01.mp4'
+    # video_file = 'd:\\Work\\nonGit\\multi-object-tracking\\videos\\soccer_02.mp4'
     # video_file = 'big_bang_12_04.mp4'
+    video_file = 'blue-bloods-s10e07-480.mp4'
     if not os.path.isfile(video_file):
-        print('Not a video file', video_file)
+        logger.error('Not a video file', video_file)
         exit(1)
 
     cap = cv2.VideoCapture(video_file)
     # vs = VideoStream(video_file).start()
     # cap = cv2.VideoCapture()
-    print("Before while")
-    trackers = cv2.MultiTracker_create()
-    iteration = 0
+    logger.info("Before while")
+    # trackers = cv2.MultiTracker_create()
+    person_list: List[Person] = []
+    face_consumer = threading.Thread(target=queue_consume)
+    face_consumer.start()
 
     while True:
+        created_humans = 0
         start_time = time.time()
         r, img = cap.read()
         # img = vs.read()
         img = cv2.resize(img, (1280, 720))
 
-        # Visualization of the results of a detection.
-
         boxes, scores, classes, num = odapi.process_frame(img)
-        detection_boxes = []
-        tracked_boxes = []
+        drawing_boxes = []
+        human_boxes = []
 
         for i in range(len(boxes)):
-            # Class 1 represents human
             if classes[i] == 1 and scores[i] > threshold:
                 box = boxes[i]
+
+                x = box[1]
+                y = box[0]
                 width = box[3] - box[1]
                 height = box[2] - box[0]
-                detection_boxes.append((box[1], box[0], width, height))
-                # print('Boxes', (box[1], box[0]), (box[3], box[2]))
-                cv2.rectangle(img, (box[1], box[0]), (box[3], box[2]), (255, 0, 0), 2)
-                # cv2.circle(img, (box[1], box[0]), 30, 10) # top left
-                # cv2.circle(img, (box[3], box[2]), 60, 60) # down right
-                if iteration == 0:
-                    object_box = (box[1], box[0], width, height)
-                    print('Object box', object_box)
-                    tracker = cv2.TrackerCSRT_create()
-                    trackers.add(tracker, img, object_box)
+                cv2.rectangle(img, (x, y), (x + width, y + height), (0, 0, 255), 4)
+                human_boxes.append((box[1], box[0], width, height))
 
-        if iteration > 0:
-            success, boxes = trackers.update(img)
-            print('Success', success, boxes)
-            for box in boxes:
-                (x, y, w, h) = [int(v) for v in box]
-                tracked_boxes.append((x, y, w, h))
-                cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        # logger.debug('Boxes', human_boxes)
+        logger.debug('Humans detected', len(human_boxes))
+        logger.debug('Humans known', len(person_list))
 
-        for b1 in detection_boxes:
-            for b2 in tracked_boxes:
-                b3 = rectangle_intersection(b1, b2)
-                if b3:
-                    cv2.rectangle(img, (b3[0], b3[1]), (b3[0] + b3[2], b3[1] + b3[3]), (0, 0, 255), 2)
+        # update the location of each person
+        # logger.debug('person list', person_list)
+        delete_people = []
+        for person in person_list:
+            logger.debug('Current person: {}'.format(person.id))
+            success, box = person.tracker.update(img)
+            if not success or not box:
+                person.present = 0
+                person.misses += 1
+                delete_people.append(person)
+                continue
 
-        iteration += 1
+            logger.debug('Check person', person.id)
+            person.misses = 0
+            person.present = 1
+            person.bbox = box
+            (x, y, w, h) = [int(v) for v in box]
+            drawing_boxes.append(box)
+            area = w * h
+            for box2 in human_boxes:
+                (x2, y2, w2, h2) = [int(v) for v in box2]
+                area2 = w2 * h2
+                intersection = rectangle_intersection(box, box2)
+                if not intersection:
+                    continue
+
+                (x3, y3, w3, h3) = intersection
+                area3 = w3 * h3
+                fraction = area3 / area
+                if fraction > 1:
+                    fraction = 1 / fraction
+
+                logger.debug('Areas', area, area3, fraction)
+
+                if fraction >= INTERSECTION_THRESHOLD:
+                    human_boxes.remove(box2)
+
+                if fraction < RESET_THRESHOLD:
+                    person.reset_tracker(img, box2)
+                    logger.debug('Reset tracker')
+                break
+
+        for person in delete_people:
+            person_list.remove(person)
+
+        logger.debug('Remaining boxes', len(human_boxes))
+        for box in human_boxes:
+            person = Person()
+            person.tracker.init(img, box)
+            # logger.debug('Box', box)
+            person.bbox = box
+            person_list.append(person)
+            logger.debug('Created new human', person.id)
+            created_humans += 1
+
+        logger.debug('People', len(person_list))
+        for person in person_list:
+            if not person.present:
+                continue
+            (x, y, w, h) = [int(v) for v in person.bbox]
+            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            cv2.putText(img, 'Person {}'.format(person.id), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
+            if not person.name:
+                body = img[y:y + h, x:x + w].copy()
+                user_info = UserIdentity(person.id, body)
+                faces_queue.put(user_info)
+
         cv2.imshow("preview", img)
         end_time = time.time()
-        print('Elapsed time', (end_time - start_time))
+        logger.info('Elapsed time', len(person_list), (end_time - start_time))
         key = cv2.waitKey(1)
         if key & 0xFF == ord('q'):
             break
+
+        # if created_humans:
+        #     time.sleep(15)
 
 
 if __name__ == '__main__':

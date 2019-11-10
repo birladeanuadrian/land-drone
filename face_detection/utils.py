@@ -1,3 +1,4 @@
+import json
 import cv2
 
 
@@ -8,9 +9,36 @@ class Person:
     def __init__(self):
         global person_id
 
-        self.tracker: cv2.Tracker
+        self.tracker: cv2.Tracker = cv2.TrackerCSRT_create()
+        cv2.MultiTracker_create()
         self.id: int = person_id
+        self.misses = 0
+        self.present = 1
+        self.bbox = None
+        self.name = ''
         person_id += 1
+
+    def reset_tracker(self, img, bbox):
+        self.tracker: cv2.Tracker = cv2.TrackerCSRT_create()
+        self.tracker.init(img, bbox)
+
+    def __str__(self):
+        data = {
+            'id': self.id,
+            'misses': self.misses,
+            'present': self.present,
+            'bbox': self.bbox
+        }
+        return 'Person' + json.dumps(data)
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class UserIdentity:
+    def __init__(self, user_id: int, cropped_box):
+        self.user_id = user_id
+        self.cropped_box = cropped_box
 
 
 def rectangle_union(a, b):
