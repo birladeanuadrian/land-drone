@@ -5,12 +5,15 @@ import cv2
 person_id = 1
 
 
+def get_tracker():
+    return cv2.TrackerKCF_create()
+
+
 class Person:
     def __init__(self):
         global person_id
 
-        self.tracker: cv2.Tracker = cv2.TrackerCSRT_create()
-        cv2.MultiTracker_create()
+        self.tracker: cv2.Tracker = get_tracker()
         self.id: int = person_id
         self.misses = 0
         self.present = 1
@@ -19,7 +22,7 @@ class Person:
         person_id += 1
 
     def reset_tracker(self, img, bbox):
-        self.tracker: cv2.Tracker = cv2.TrackerCSRT_create()
+        self.tracker: cv2.Tracker = get_tracker()
         self.tracker.init(img, bbox)
 
     def __str__(self):

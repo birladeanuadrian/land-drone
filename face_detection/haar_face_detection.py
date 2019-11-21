@@ -1,7 +1,7 @@
 import cv2 as cv
 import argparse
 import os
-from helper import current_milli_time
+from common import current_milli_time
 
 
 face_cascade1: cv.CascadeClassifier

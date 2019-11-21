@@ -40,3 +40,6 @@ face_detection/models/
 face_detection/.idea/
 *.mp4
 face_detection/faced/models/
+person-detector/models/
+person-detector/.idea/
+person-detector/node_modules/

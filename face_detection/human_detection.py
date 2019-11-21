@@ -2,24 +2,23 @@
 # https://github.com/tensorflow/models/blob/master/research/object_detection/object_detection_tutorial.ipynb
 # https://medium.com/object-detection-using-tensorflow-and-coco-pre/object-detection-using-tensorflow-and-coco-pre-trained-models-5d8386019a8
 # https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md
+# https://www.pyimagesearch.com/2018/07/30/opencv-object-tracking/
 # Tensorflow Object Detection Detector
 
 import os
 import numpy as np
 import tensorflow as tf
-import cv2
 import time
 import queue
 
-import threading
 from utils import *
-from imutils.video import VideoStream
 from typing import List
 from logger import logger
+from face_detecter import FaceDetector
 
 
 INTERSECTION_THRESHOLD = 0.65
-RESET_THRESHOLD = 0.75
+RESET_THRESHOLD = 0.85
 faces_queue = queue.Queue()
 
 
@@ -56,11 +55,11 @@ class DetectorAPI:
         # Expand dimensions since the trained_model expects images to have shape: [1, None, None, 3]
         image_np_expanded = np.expand_dims(image, axis=0)
         # Actual detection.
-        local_start_time = time.time()
+        # local_start_time = time.time()
         (boxes, scores, classes, num) = self.sess.run(
             [self.detection_boxes, self.detection_scores, self.detection_classes, self.num_detections],
             feed_dict={self.image_tensor: image_np_expanded})
-        local_end_time = time.time()
+        # local_end_time = time.time()
 
         # logger.info("Elapsed Time:", local_end_time-local_start_time)
 
@@ -102,27 +101,21 @@ def main():
     # cap = cv2.VideoCapture(0)
     # video_file = 'd:\\Work\\nonGit\\multi-object-tracking\\videos\\soccer_01.mp4'
     # video_file = 'd:\\Work\\nonGit\\multi-object-tracking\\videos\\soccer_02.mp4'
-    # video_file = 'big_bang_12_04.mp4'
-    video_file = 'blue-bloods-s10e07-480.mp4'
+    video_file = 'blue-bloods-s10e07-720.mp4'
     if not os.path.isfile(video_file):
         logger.error('Not a video file', video_file)
         exit(1)
 
     cap = cv2.VideoCapture(video_file)
-    # vs = VideoStream(video_file).start()
-    # cap = cv2.VideoCapture()
     logger.info("Before while")
-    # trackers = cv2.MultiTracker_create()
     person_list: List[Person] = []
-    face_consumer = threading.Thread(target=queue_consume)
-    face_consumer.start()
+    face_detector = FaceDetector(faces_queue)
+    face_detector.start()
 
     while True:
         created_humans = 0
         start_time = time.time()
         r, img = cap.read()
-        # img = vs.read()
-        img = cv2.resize(img, (1280, 720))
 
         boxes, scores, classes, num = odapi.process_frame(img)
         drawing_boxes = []
@@ -163,8 +156,6 @@ def main():
             drawing_boxes.append(box)
             area = w * h
             for box2 in human_boxes:
-                (x2, y2, w2, h2) = [int(v) for v in box2]
-                area2 = w2 * h2
                 intersection = rectangle_intersection(box, box2)
                 if not intersection:
                     continue
@@ -192,7 +183,6 @@ def main():
         for box in human_boxes:
             person = Person()
             person.tracker.init(img, box)
-            # logger.debug('Box', box)
             person.bbox = box
             person_list.append(person)
             logger.debug('Created new human', person.id)
@@ -216,9 +206,6 @@ def main():
         key = cv2.waitKey(1)
         if key & 0xFF == ord('q'):
             break
-
-        # if created_humans:
-        #     time.sleep(15)
 
 
 if __name__ == '__main__':

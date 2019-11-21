@@ -1,6 +1,6 @@
 import time
 import cv2 as cv
-from helper import current_milli_time
+from common import current_milli_time
 from mtcnn.mtcnn import MTCNN
 
 
