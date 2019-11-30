@@ -27,7 +27,7 @@ for person in people:
     for image in for_train:
         image_path = os.path.join(person_dir, image)
         mat = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-        cv2.imshow('Training {} {}'.format(person_id, rand()), mat)
+        # cv2.imshow('Training {} {}'.format(person_id, rand()), mat)
         # train_images.append(cv2.UMat(mat))
         train_images.append(mat)
         labels.append(person_id)
@@ -54,8 +54,8 @@ model.write("model.yml")
 
 for image in test_images:
     image_id = rand()
-    cv2.imshow('Test {}'.format(image_id), image)
-    labels = model.predict(test_images[0])
+    # cv2.imshow('Test {}'.format(image_id), image)
+    labels = model.predict(image)
     print('Predictions', labels)
     cv2.imshow('Person {} {}'.format(image_id, labels[0]), image)
 

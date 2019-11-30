@@ -92,9 +92,17 @@ def queue_consume():
 def main():
     # model_path = 'models/faster_rcnn_inception_v2_coco_2018_01_28/frozen_inference_graph.pb'
     # model_path = 'models/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb'
-    model_path = 'models/ssdlite_mobilenet_v2_coco_2018_05_09/frozen_inference_graph.pb'
+    # model_path = 'models/ssdlite_mobilenet_v2_coco_2018_05_09/frozen_inference_graph.pb'
+    model_path = 'models/ssd_mobilenet_v2_coco_2018_03_29/frozen_inference_graph.pb'
     odapi = DetectorAPI(path_to_ckpt=model_path)
     threshold = 0.7
+
+    # how ssdlite actually works, expected data format/size
+    # debugging: de cate ori se apeleaza reteaua, face cropping intern?
+    # sar cu stride?
+
+    # face recognition scaling?
+    # foarte clar use case-uri, constrangeri
 
     # cap = cv2.VideoCapture('big_bang_12_04.mp4')
     # cap = VideoStream('big_bang_12_04.mp4').start()
@@ -109,13 +117,14 @@ def main():
     cap = cv2.VideoCapture(video_file)
     logger.info("Before while")
     person_list: List[Person] = []
-    face_detector = FaceDetector(faces_queue)
-    face_detector.start()
+    # face_detector = FaceDetector(faces_queue)
+    # face_detector.start()
 
     while True:
         created_humans = 0
         start_time = time.time()
         r, img = cap.read()
+        # img = cv2.resize(img, (224, 224,))
 
         boxes, scores, classes, num = odapi.process_frame(img)
         drawing_boxes = []

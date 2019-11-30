@@ -6,6 +6,7 @@ import tensorflow as tf
 from fr_utils import *
 from inception_blocks_v2 import *
 from keras import backend as K
+from common import INPUT_SHAPE
 
 
 def triplet_loss(y_true, y_pred, alpha=0.3):
@@ -56,7 +57,7 @@ def who_is_it(image, database, model):
 
 
 K.set_image_data_format('channels_first')
-FRmodel = faceRecoModel(input_shape=(3, 96, 96))
+FRmodel = faceRecoModel(input_shape=INPUT_SHAPE)
 FRmodel.compile(optimizer='adam', loss=triplet_loss, metrics=['accuracy'])
 load_weights_from_FaceNet(FRmodel)
 db = prepare_database()

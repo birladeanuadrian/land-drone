@@ -4,14 +4,14 @@ from mtcnn.mtcnn import MTCNN
 from common import FACE_SIZE
 
 
-SOURCE_PATH = 'C:\\Users\\birla\\Pictures\\blue_bloods\\will_estes'
-DEST_PATH = 'D:\\Work\\git\\LandDrone\\face_detection\\models\\faces\\blue_bloods\\Will_Estes'
+# SOURCE_PATH = 'C:\\Users\\birla\\Pictures\\blue_bloods\\will_estes'
+# DEST_PATH = 'D:\\Work\\git\\LandDrone\\face_detection\\models\\faces\\blue_bloods\\Will_Estes'
 # SOURCE_PATH = 'C:\\Users\\birla\\Pictures\\blue_bloods\\jack_boyle'
 # DEST_PATH = 'D:\\Work\\git\\LandDrone\\face_detection\\models\\faces\\blue_bloods\\Jack_Boyle'
 # SOURCE_PATH = 'C:\\Users\\birla\\Pictures\\blue_bloods\\donnie_wahlberg'
 # DEST_PATH = 'D:\\Work\\git\\LandDrone\\face_detection\\models\\faces\\blue_bloods\\Donnie_Wahlberg'
-# SOURCE_PATH = 'C:\\Users\\birla\\Pictures\\blue_bloods\\bridget_moynahan'
-# DEST_PATH = 'D:\\Work\\git\\LandDrone\\face_detection\\models\\faces\\blue_bloods\\Bridget_Moynahan'
+SOURCE_PATH = 'C:\\Users\\birla\\Pictures\\blue_bloods\\bridget_moynahan'
+DEST_PATH = 'D:\\Work\\git\\LandDrone\\face_detection\\models\\faces\\blue_bloods\\Bridget_Moynahan'
 
 
 def convert_faces():
