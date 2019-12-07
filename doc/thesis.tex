@@ -1,0 +1,456 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%% File: thesis.tex, version 1.9, May 2016
+%%%
+%%% =============================================
+%%% This file contains a template that can be used with the package
+%%% cs.sty and LaTeX2e to produce a thesis that meets the requirements
+%%% of the Computer Science Department from the Technical University of Cluj-Napoca
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt,a4paper,twoside]{report}         
+\usepackage{cs}              
+\usepackage{times}
+\usepackage{graphicx}
+\usepackage{latexsym}
+\usepackage{amsmath,amsbsy}
+\usepackage{amssymb}
+\usepackage[matrix,arrow]{xy}
+\usepackage[T1]{fontenc}
+\usepackage{ae,aecompl}
+%\usepackage{shortcut} %definitii pentru diacritice; 
+\usepackage{amstext}
+\usepackage{graphics}
+\usepackage{ae,aecompl}
+\usepackage{algorithm}
+%\usepackage{algorithmic}
+\usepackage{color}
+\usepackage{enumitem}
+
+% \mastersthesis
+\diplomathesis
+% \leftchapter
+\centerchapter
+% \rightchapter
+\singlespace
+% \oneandhalfspace
+% \doublespace
+
+\newcommand{\applicationTitle}{Meal Menu Generator}
+
+\renewcommand{\thesisauthor}{Firstname LASTNAME}    %% Your name.
+\renewcommand{\thesismonth}{June}     %% Your month of graduation.
+\renewcommand{\thesisyear}{2018}      %% Your year of graduation.
+\renewcommand{\thesistitle}{LICENSE THESIS TITLE} 
+\renewcommand{\thesissupervisor}{scientific title Firstname LASTNAME}
+\newcommand{\department}{\bf FACULTY OF AUTOMATION AND COMPUTER SCIENCE\\
+COMPUTER SCIENCE DEPARTMENT}
+\newcommand{\thesis}{LUCRARE DE LICEN'T'A}
+\newcommand{\utcnlogo}{\includegraphics[width=15cm]{img/tucn.jpg}}
+
+\newcommand{\uline}[1]{\rule[0pt]{#1}{0.4pt}}
+%\renewcommand{\thesisdedication}{P\u{a}rin\c{t}ilor mei}
+
+\begin{document}
+%\frontmatter
+%\pagestyle{headings}
+
+\newenvironment{definition}[1][Defini\c{t}ie.]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+
+
+
+%\thesistitle                    %% Generate the title page.
+%\authordeclarationpage                %% Generate the declaration page.
+
+\pagenumbering{arabic}
+\setcounter{page}{4}
+
+
+
+\begin{center}
+\utcnlogo
+
+\department
+
+\vspace{4cm}
+
+{\bf \thesistitle} %LICENSE THESIS TITLE}
+
+\vspace{1.5cm}
+
+LICENSE THESIS
+
+\vspace{6cm}
+
+Graduate: {\bf Adrian BIRLADEANU}
+
+Supervisor: {\bf \thesissupervisor}
+
+\vspace{3cm}
+{\bf \thesisyear}
+\end{center}
+
+\thispagestyle{empty}
+\newpage
+
+\begin{center}
+\utcnlogo
+
+\department
+
+\end{center}
+\vspace{0.5cm}
+
+%\begin{small}
+\begin{tabular}{p{7cm}p{8cm}}
+ %\hspace{-1cm}& APPROVED,\\
+ \hspace{-1cm}DEAN, & HEAD OF DEPARTMENT,\\
+ \hspace{-1cm}{\bf Prof. dr. eng. Liviu MICLEA} & {\bf Prof. dr. eng. Rodica POTOLEA}\\  
+\end{tabular}
+ 
+\vspace{2cm}
+
+\begin{center}
+Graduate: {\bf \thesisauthor}
+
+\vspace{1cm}
+
+{\bf \thesistitle}
+\end{center}
+
+\vspace{1cm}
+
+\begin{enumerate}
+ \item {\bf Project proposal:} {\it Short description of the license thesis and initial data}
+\item {\bf Project contents:} {\it (enumerate the main component parts) Presentation page, advisor's evaluation, title of chapter 1, title of chapter 2, ..., title of chapter n, bibliography, appendices.}
+\item {\bf Place of documentation:} {\it Example}: Technical University of Cluj-Napoca, Computer Science Department
+\item {\bf Consultants:}
+\item {\bf Date of issue of the proposal:} November 1, 2016
+\item {\bf Date of  delivery:} February 21, 2018 {\it (the date when the document is submitted)}
+  \end{enumerate}
+\vspace{1.2cm}
+
+\hspace{6cm} Graduate: \uline{6cm} 
+
+\vspace{0.5cm}
+\hspace{6cm} Supervisor: \uline{6cm} 
+%\end{small}
+
+\thispagestyle{empty}
+
+
+\newpage
+$ $
+%\begin{center}
+%\utcnlogo
+
+%\department
+%\end{center}
+
+\thispagestyle{empty}
+\newpage
+
+\begin{center}
+\utcnlogo
+
+\department
+\end{center}
+
+\vspace{0.5cm}
+
+\begin{center}
+{\bf
+Declara\c{t}ie pe proprie r\u{a}spundere privind\\ 
+autenticitatea lucr\u{a}rii de licen\c{t}\u{a}}
+\end{center}
+\vspace{1cm}
+
+
+
+Subsemnatul(a) \\
+\uline{14.8cm}, 
+legitimat(\u{a}) cu \uline{4cm} seria \uline{3cm} nr. \uline{4cm}\\
+CNP \uline{9cm}, autorul lucr\u{a}rii \uline{2.8cm}\\
+\uline{16cm}\\
+\uline{16cm}\\
+elaborat\u{a} \^{\i}n vederea sus\c{t}inerii examenului de finalizare a studiilor de licen\c{t}\u{a} la Facultatea de Automatic\u{a} \c{s}i Calculatoare, Specializarea \uline{7cm} din cadrul Universit\u{a}\c{t}ii Tehnice din Cluj-Napoca, sesiunea \uline{4cm} a anului universitar \uline{3cm}, declar pe proprie r\u{a}spundere, c\u{a} aceast\u{a} lucrare este rezultatul propriei activit\u{a}\c{t}i intelectuale, pe baza cercet\u{a}rilor mele \c{s}i pe baza informa\c{t}iilor ob\c{t}inute din surse care au fost citate, \^{\i}n textul lucr\u{a}rii \c{s}i \^{\i}n bibliografie.
+
+Declar, c\u{a} aceast\u{a} lucrare nu con\c{t}ine por\c{t}iuni plagiate, iar sursele bibliografice au fost folosite cu 
+respectarea legisla\c{t}iei rom\^{a}ne \c{s}i a conven\c{t}iilor interna\c{t}ionale privind drepturile de autor.
+
+Declar, de asemenea, c\u{a} aceast\u{a} lucrare nu a mai fost prezentat\u{a} \^{\i}n fa\c{t}a unei alte comisii de examen de licen\c{t}\u{a}.
+
+\^{I}n cazul constat\u{a}rii ulterioare a unor declara\c{t}ii false, voi suporta sanc\c{t}iunile administrative, respectiv, \emph{anularea examenului de licen\c{t}\u{a}}.
+
+\vspace{1.5cm}
+
+Data \hspace{8cm} Nume, Prenume
+
+\vspace{0.5cm}
+
+\uline{3cm} \hspace{5cm} \uline{5cm}
+
+\vspace{0.5cm}
+\hspace{9.4cm}Semn\u{a}tura
+
+\thispagestyle{empty}
+
+\newpage
+
+
+%\listoftables
+%\listoffigures
+
+%\clearpage 
+%\newpage
+
+%\begin{comment}
+\include{guideline} 
+%\end{comment}
+
+\newpage
+
+\tableofcontents
+\newpage
+
+
+
+
+%\subsection{Subsection}
+%%Each table used in this document is labeled as Table x.y, where x represents the chapter number, and y shows the table number within the current chapter. Leave a blank line between and after each table, relative to the adjacent paragraphs (table~\ref{table:nonlin}).
+%
+%\begin{table}[ht]
+%\caption{Nonlinear Model Results}
+%\centering                          % tabel centrat
+%\begin{tabular}{|c|c|c|c|}          % 4 coloane centrate
+%\hline\hline                        % linie orizontala dubla
+%Case & Method\#1 & Method\#2 & Method\#3 \\ [0.5ex]   % inserare tabel
+%%heading
+%\hline                              % linie orizontal simpla
+%1 & 50 & 837 & 970 \\               % corpul tabelului
+%2 & 47 & 877 & 230 \\
+%3 & 31 & 25 & 415 \\[1ex]           % [1ex] adds vertical space
+%\hline
+%\end{tabular}
+%  % titlul tabelului
+%\label{table:nonlin}                % \label{table:nonlin} introduce eticheta folosita pentru referirea tabelului in text; referirea in text se va face cu \ref{table:nonlin}
+%\end{table}
+%
+%Each figure used in the document must be cited within the text (ex: in figure x.y the system components are presented... ) and labeled. The labeling must be as Figure x.y where x represents the chapter number, and y shows the number of the figure within the current chapter.
+% E.g.: figure \ref{fig:imag}.
+%
+%\begin{figure}[ht]
+%    \centering
+%\includegraphics[]{img/test.jpg}
+%    \caption{The figure`s name}
+%    \label{fig:imag}
+%\end{figure}
+%
+%Each chapter must start on a new page.
+
+\include{src/introduction}
+
+\include{src/specification}
+
+\include{src/research}
+
+\include{src/analysis}
+
+\include{src/implementation}
+
+\chapter{Testing and Validation}
+
+About 5\% of the paper
+\section{Title}
+\section{Other title}
+
+\chapter{User's manual}
+
+\section{Hardware}
+In order to run the application, an administrator requires at leat a \
+physical or virtual machine with a x64 processor, 2 GB RAM and 50GB hard disk.\
+Ideally, the machine should be running a Linux OS, but Windows is also supported.
+
+\section{Software Dependencies}
+In the following section, we will present the installation steps on Debian-based OS \
+(Debian, Ubuntu, Mint).
+
+There are 3 main dependencies: Apache Tomcat(the environment used to run the \
+application server), MySQL(used to host the application database) and NginX (web \
+server which will be used as a reverse proxy and where we will setup the SSL encryption).\
+However, before installing any software the administrator must update the package \
+repositories by running the following command in a terminal:
+
+%\begin{verbatim}
+%sudo apt update
+%\end{verbatim}
+%
+%\subsection{MySQL}
+%In order to install MySQL server, you need to run the following commands:
+%\begin{verbatim}
+%apt install mysql-server
+%/etc/init.d/mysql start
+%\end{verbatim}
+%
+%Then, you need to add a custom admin user:
+%\begin{verbatim}
+%mysql -u root -p
+%mysql>CREATE USER 'user'@'%' IDENTIFIED BY 'password';
+%mysql>GRANT ALL PRIVILEGES ON *.* TO 'user'@'%' WITH GRANT OPTION;
+%mysql>FLUSH PRIVILEGES;
+%mysql>quit;
+%\end{verbatim}
+%Then, you need to edit the \textit{my.cnf} file to allow remote connections to the \
+%mysql server. Usually it is located at \textit{/etc/mysql/my.cnf}, but this may change \
+%depending on the OS. You need to change the \textit{bind-address} option as below:
+%\begin{verbatim}
+%bind-address = 0.0.0.0
+%\end{verbatim}
+%
+%Then restart the mysql service with the command \textit{sudo /etc/init.d/mysql restart}.
+%
+%
+%\subsection{Apache Tomcat}
+%
+%In order to install Apache Tomcat, a user first needs to install Java on the system. \
+%This can be done by running the following command (This will install both the runtime \
+%environment and the development kit.):
+%
+%\begin{verbatim}
+%sudo apt install default-jdk
+%\end{verbatim}
+%
+%In order to validate the installation, run the following commands:
+%\begin{verbatim}
+%java -version
+%javac -version
+%\end{verbatim}
+%If no error is presented, the the java environment was installed successfully.
+%
+%Next, you need to add a \textit{tomcat} user and user group. The home directory will \
+%be \textit{/opt/tomcat}, and the shell \textit{/bin/false}, so that no user can login \
+%as tomcat.
+%
+%\begin{verbatim}
+%sudo groupadd tomcat
+%sudo mkdir -p /opt/tomcat
+%sudo useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat
+%\end{verbatim}
+%
+%Next, you need to install additional dependencies:
+%\begin{verbatim}
+%sudo apt install curl
+%\end{verbatim}
+%Then, download the tomcat sources and extract them:
+%\begin{verbatim}
+%cd /tmp
+%curl -O apache.mirrors.ionfish.org/tomcat/tomcat-9/v9.0.10/src/apache-tomcat-9.0.10-src.tar.gz
+%tar xzvf apache-tomcat-9.0.10-src.tar.gz -C /opt/tomcat --strip-components=1
+%\end{verbatim}
+%
+%Next, you need to update user permissions:
+%\begin{verbatim}
+%cd /opt/tomcat
+%sudo chgrp -R tomcat /opt/tomcat
+%sudo chmod -R g+r conf
+%sudo chmod g+x conf
+%sudo chown -R tomcat webapps/ work/ temp/ logs/
+%\end{verbatim}
+%
+%Next, you need to create the service file. For that, you need the \
+%\textit{JAVA\_HOME}. In order to obtain it, run the command: \
+%\textit{sudo update-java-alternatives -l}. The output should be \
+%something similar to below:
+%\begin{verbatim}
+%java-1.8.0-openjdk-amd64       1081       /usr/lib/jvm/java-1.8.0-openjdk-amd64
+%\end{verbatim}
+%
+%The \textit{JAVA\_HOME} can be constructed by appending \textit{/jre} \
+%to the last column. Now you can create the file \
+%\textit{/etc/systemd/system/tomcat.service} and put the following \
+%contents in it:
+%
+%\begin{verbatim}
+%[Unit]
+%Description=Apache Tomcat Web Application Container
+%After=network.target
+%
+%[Service]
+%Type=forking
+%
+%Environment=JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64/jre
+%Environment=CATALINA_PID=/opt/tomcat/temp/tomcat.pid
+%Environment=CATALINA_HOME=/opt/tomcat
+%Environment=CATALINA_BASE=/opt/tomcat
+%Environment='CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC'
+%Environment='JAVA_OPTS=-Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom'
+%
+%ExecStart=/opt/tomcat/bin/startup.sh
+%ExecStop=/opt/tomcat/bin/shutdown.sh
+%
+%User=tomcat
+%Group=tomcat
+%UMask=0007
+%RestartSec=10
+%Restart=always
+%
+%[Install]
+%WantedBy=multi-user.target
+%\end{verbatim}
+%
+%Next, you need to reload the systemd daemon in order for it to discover \
+%the new tomcat service, and then you can start the service.
+%\begin{verbatim}
+%sudo systemctl daemon-reload
+%sudo systemctl start tomcat
+%\end{verbatim}
+%In the installation description section your should detail the hardware \
+%and software resources needed for installing and running the application, \
+%and a step by step description of how your application can be \
+%deployed/installed. An administrator should be able to perform the \
+%installation/deployment based on your instructions.
+%
+%In the user manual section you describe how to use the application from \
+%the point of view of a user with no inside technical information; this \
+%should be done with screen shots and a stepwize explanation of the interaction. \
+%Based on user's manual, a person should be able to use your product.
+
+\chapter{Conclusions}
+
+About. 5\% of the whole
+
+Here your write:
+\begin{itemize}
+\item a summary of your contributions/achievements,
+\item a critical analysis of the achieved results,
+\item a description of the possibilities of improving/further development.
+\end{itemize}
+\section{Title}
+\section{Other title}
+
+
+%\addcontentsline {toc}{chapter}{Bibliography}
+\bibliographystyle{IEEEtran} 
+\bibliography{thesis}%same file name as for .bib
+
+
+\include{apendix}
+
+\end{document}
+
+\begin{document}
+
+
+
+\end{document}
+\begin{document}
+
+
+
+\end{document}
+\begin{document}
+
+
+
+\end{document}

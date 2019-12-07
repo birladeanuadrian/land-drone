@@ -88,6 +88,8 @@ def queue_consume():
         if key & 0xFF == ord('q'):
             break
 
+times = []
+
 
 def main():
     # model_path = 'models/faster_rcnn_inception_v2_coco_2018_01_28/frozen_inference_graph.pb'
@@ -122,9 +124,9 @@ def main():
 
     while True:
         created_humans = 0
-        start_time = time.time()
         r, img = cap.read()
-        # img = cv2.resize(img, (224, 224,))
+        start_time = time.time()
+        # img = cv2.resize(img, (720, 720,))
 
         boxes, scores, classes, num = odapi.process_frame(img)
         drawing_boxes = []
@@ -147,75 +149,86 @@ def main():
 
         # update the location of each person
         # logger.debug('person list', person_list)
-        delete_people = []
-        for person in person_list:
-            logger.debug('Current person: {}'.format(person.id))
-            success, box = person.tracker.update(img)
-            if not success or not box:
-                person.present = 0
-                person.misses += 1
-                delete_people.append(person)
-                continue
-
-            logger.debug('Check person', person.id)
-            person.misses = 0
-            person.present = 1
-            person.bbox = box
-            (x, y, w, h) = [int(v) for v in box]
-            drawing_boxes.append(box)
-            area = w * h
-            for box2 in human_boxes:
-                intersection = rectangle_intersection(box, box2)
-                if not intersection:
-                    continue
-
-                (x3, y3, w3, h3) = intersection
-                area3 = w3 * h3
-                fraction = area3 / area
-                if fraction > 1:
-                    fraction = 1 / fraction
-
-                logger.debug('Areas', area, area3, fraction)
-
-                if fraction >= INTERSECTION_THRESHOLD:
-                    human_boxes.remove(box2)
-
-                if fraction < RESET_THRESHOLD:
-                    person.reset_tracker(img, box2)
-                    logger.debug('Reset tracker')
-                break
-
-        for person in delete_people:
-            person_list.remove(person)
-
-        logger.debug('Remaining boxes', len(human_boxes))
-        for box in human_boxes:
-            person = Person()
-            person.tracker.init(img, box)
-            person.bbox = box
-            person_list.append(person)
-            logger.debug('Created new human', person.id)
-            created_humans += 1
-
-        logger.debug('People', len(person_list))
-        for person in person_list:
-            if not person.present:
-                continue
-            (x, y, w, h) = [int(v) for v in person.bbox]
-            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            cv2.putText(img, 'Person {}'.format(person.id), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
-            if not person.name:
-                body = img[y:y + h, x:x + w].copy()
-                user_info = UserIdentity(person.id, body)
-                faces_queue.put(user_info)
+        # delete_people = []
+        # for person in person_list:
+        #     logger.debug('Current person: {}'.format(person.id))
+        #     success, box = person.tracker.update(img)
+        #     if not success or not box:
+        #         person.present = 0
+        #         person.misses += 1
+        #         delete_people.append(person)
+        #         continue
+        #
+        #     logger.debug('Check person', person.id)
+        #     person.misses = 0
+        #     person.present = 1
+        #     person.bbox = box
+        #     (x, y, w, h) = [int(v) for v in box]
+        #     drawing_boxes.append(box)
+        #     area = w * h
+        #     for box2 in human_boxes:
+        #         intersection = rectangle_intersection(box, box2)
+        #         if not intersection:
+        #             continue
+        #
+        #         (x3, y3, w3, h3) = intersection
+        #         area3 = w3 * h3
+        #         fraction = area3 / area
+        #         if fraction > 1:
+        #             fraction = 1 / fraction
+        #
+        #         logger.debug('Areas', area, area3, fraction)
+        #
+        #         if fraction >= INTERSECTION_THRESHOLD:
+        #             human_boxes.remove(box2)
+        #
+        #         if fraction < RESET_THRESHOLD:
+        #             person.reset_tracker(img, box2)
+        #             logger.debug('Reset tracker')
+        #         break
+        #
+        # for person in delete_people:
+        #     person_list.remove(person)
+        #
+        # logger.debug('Remaining boxes', len(human_boxes))
+        # for box in human_boxes:
+        #     person = Person()
+        #     person.tracker.init(img, box)
+        #     person.bbox = box
+        #     person_list.append(person)
+        #     logger.debug('Created new human', person.id)
+        #     created_humans += 1
+        #
+        # logger.debug('People', len(person_list))
+        # for person in person_list:
+        #     if not person.present:
+        #         continue
+        #     (x, y, w, h) = [int(v) for v in person.bbox]
+        #     cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        #     cv2.putText(img, 'Person {}'.format(person.id), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
+        #     if not person.name:
+        #         body = img[y:y + h, x:x + w].copy()
+        #         user_info = UserIdentity(person.id, body)
+        #         faces_queue.put(user_info)
 
         cv2.imshow("preview", img)
         end_time = time.time()
-        logger.info('Elapsed time', len(person_list), (end_time - start_time))
+        time_diff = (end_time - start_time)
+        fps = 1 / time_diff
+        times.append(fps)
+        logger.info('Elapsed time', len(person_list), time_diff, fps)
         key = cv2.waitKey(1)
         if key & 0xFF == ord('q'):
+            break
+        if len(times) == 1000:
             break
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        avg_fps = sum(times) / len(times)
+        print('Average FPS: {} in {} images'.format(avg_fps, len(times)))
