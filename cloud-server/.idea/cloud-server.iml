@@ -7,5 +7,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="node-webrtc-examples" />
+    <orderEntry type="module" module-name="webrtc-web" />
   </component>
 </module>

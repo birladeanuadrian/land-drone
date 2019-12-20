@@ -28,8 +28,18 @@
 
 \subsection{Image transmission}
 \label{subsec:image-transmission}
- I needed to devise an algorithm that would allow to one source to send multiple images to several receivers that are
+ I needed to devise an algorithm that would allow to one source to send images to several receivers that are
  not on the same network and at considerable distances, and at the same time having a delay as small as possible.
+ Since the sender and the receivers won't be on the same network, they will need to interact via a 3rd component,
+ a server that runs in cloud.
+ The
+
+\subsection{Person Detection}
+\label{subsec:person-detection}
+Person detection consists of 2 phases: full person detection, and face detection. % maybe test just face detection
+This is due to the fact that it's easier to detect and track a person than to detect and track a face.
+For person detection I have chosen neural networks
+
 
  According to [1], \ %todo: insert bib ref
 different low level heuristics behave differently in different environments, with some working better than others. \

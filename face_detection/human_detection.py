@@ -20,6 +20,10 @@ from face_detecter import FaceDetector
 INTERSECTION_THRESHOLD = 0.65
 RESET_THRESHOLD = 0.85
 faces_queue = queue.Queue()
+# gpu_devices = tf.config.experimental.list_physical_devices('GPU')
+# print('GPU devices', gpu_devices)
+# tf.config.experimental.set_memory_growth(gpu_devices[0], True)
+# tf.config.experimental.set_virtual_device_configuration(gpu_devices[0], [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=512, )])
 
 
 class DetectorAPI:
@@ -35,6 +39,9 @@ class DetectorAPI:
                 tf.compat.v1.import_graph_def(od_graph_def, name='')
 
         self.default_graph = self.detection_graph.as_default()
+        # gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.7, allow_growth=True)
+        # gpu_config = tf.compat.v1.ConfigProto(gpu_options=gpu_options)
+        # self.sess = tf.compat.v1.Session(graph=self.detection_graph, config=gpu_config)
         self.sess = tf.compat.v1.Session(graph=self.detection_graph)
 
         # Definite input and output Tensors for detection_graph
@@ -126,7 +133,7 @@ def main():
         created_humans = 0
         r, img = cap.read()
         start_time = time.time()
-        # img = cv2.resize(img, (720, 720,))
+        img = cv2.resize(img, (600, 600,))
 
         boxes, scores, classes, num = odapi.process_frame(img)
         drawing_boxes = []
@@ -230,5 +237,6 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         pass
     finally:
-        avg_fps = sum(times) / len(times)
-        print('Average FPS: {} in {} images'.format(avg_fps, len(times)))
+        if len(times):
+            avg_fps = sum(times) / len(times)
+            print('Average FPS: {} in {} images'.format(avg_fps, len(times)))
