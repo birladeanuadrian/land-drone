@@ -29,6 +29,9 @@ in Afghanistan may take up to 1.2 seconds to reach the operator in the US). \
 High-Speed internet might provide a third control mechanism, that could remove the range limitation \
 of the radio and decrease the latency of current satellite uplinks.
 
+% todo: return here at home
+Possible commercial use cases for this drone include wildlife observation,
+
 
 \section{General Objectives}
 \label{sec:specification-objectives}
@@ -39,8 +42,10 @@ half-way around the world.
 \label{subsec:use-cases}
 The project will need to meet the following use cases:
 
-\subsubsection{Login}
+\subsubsection{\textbf{Login}}
+
 \textbf{Primary Actor:} Drone Operator
+
 \textbf{Stakeholders and Interests:}
 \begin{enumerate}
     \item \textit{Drone Operator}: wants to be the sole person who controls \
@@ -48,7 +53,9 @@ The project will need to meet the following use cases:
     \item \textit{Drone owner}: wants to limit access to the drone video feed \
             and control to authorized personnel only
 \end{enumerate}
+
 \textbf{Postcondition:} The operator is granted access to the land drone
+
 \textbf{Main Success Scenario}
 \begin{enumerate}
     \item the operator goes to the drone url
@@ -58,6 +65,7 @@ The project will need to meet the following use cases:
     \item the cloud server gives the operator access to the drone video \
             feed and controls
 \end{enumerate}
+
 \textbf{Extensions}
 \begin{itemize}
     \item 3. The username or password is incorrect
@@ -73,7 +81,164 @@ The project will need to meet the following use cases:
         \end{itemize}
 \end{itemize}
 
-\subsubsection{Video Feed}
+\subsubsection{\textbf{View Drone Footage}}
+\textbf{Primary Actor:} Drone Operator
+
+\textbf{Stakeholders and Interests:}
+\begin{enumerate}
+    \item \textit{Drone Operator:} wants to view a live video feed from the drone
+    \item \textit{Drone Operator and Owner} want to view the drone footage at a later date
+\end{enumerate}
+
+\textbf{Preconditions:} Drone operator has logged in and is the sole operator for the drone
+
+\textbf{Main Success Scenario}
+\begin{enumerate}
+    \item Drone operator goes to the drone page
+    \item Drone operator clicks on the \textbf{Start video feed} button
+    \item The drone starts transmitting video feed
+    \item The frontend shows the live video feed
+\end{enumerate}
+
+\textbf{Extensions}
+\begin{itemize}
+    \item The drone operator wants to save the video feed so that he can watch it at a later date
+        \begin{itemize}
+            \item After clicking on the \textbf{Start video feed} button, the operator clicks on the \
+                    \textbf{Record feed} button
+            \item The system starts recording the video feed
+            \item The operator clicks on the \textbf{Stop recording} button
+            \item The operator click on the \textbf{Download recording button}
+            \item The system downloads the recording
+        \end{itemize}
+    \item The drone operator wants people to be highlighted
+            \begin{itemize}
+                \item After clicking on the \textbf{Start video feed}, but before clicking on the \
+                        \textbf{Record feed} button, the operator presses on the \textbf{Highlight people} button
+                \item The system shows the video feed, highlighting people and writing the names of the
+                        known ones
+            \end{itemize}
+    \item A second operator wants to view the real time footage
+            \begin{itemize}
+                \item The second operator logs in
+                \item The second operator views the same footage as the first
+                \item The system disables all actions for the second operator (start recording, highlight people)
+            \end{itemize}
+\end{itemize}
+
+\subsubsection{Control the drone}
+
+\textbf{Primary Actor:} Drone Operator
+
+\textbf{Stakeholders and Interests:}
+\begin{enumerate}
+    \item \textit{Drone operator} wants to move the drone in specific directions in order to meet his objectives
+\end{enumerate}
+
+\textbf{Preconditions:} Drone operator has logged in
+
+\textbf{Main Success Scenario}
+\begin{enumerate}
+    \item The drone operator starts video feed and waits for it
+    \item The drone operator controls the drone using the keyboard arrow keys
+\end{enumerate}
+
+\textbf{Extensions}
+\begin{itemize}
+    \item A second operator enters the drone page while the first operator control the drone
+            \begin{itemize}
+                \item The system disables the controls for the second operator
+            \end{itemize}
+\end{itemize}
+
+
+\subsubsection{\textbf{Wildlife observation}}
+
+\textbf{Primary Actor:} Drone operator working for a wildlife observation organisation
+
+\textbf{Stakeholders and Interests:}
+\begin{enumerate}
+    \item Documentaries producers want to record animals in their natural habitat
+    \item Wildlife protection NGOs want to observe threatened animals and protect them from poachers
+\end{enumerate}
+
+\textbf{Preconditions:} The area where the drone will be deployed has decent internet coverage, with minimum 10Mbps upload speed
+
+\textbf{Main Success Scenario}  % todo: return here
+\begin{enumerate}
+    \item The drone is equipped with more powerful batteries
+\end{enumerate}
+
+
+\section{Functional Requirements}
+\label{sec:functional-requirements}
+
+In software engineering, a functional requirement is a function of a system or its components. \
+Such a function consists of a specific set of inputs, a behavior and an output. \
+Functional requirements describe what the system \
+is expected to do in order to accomplish its purpose and reach the desired results.
+
+The functional requirements I have set out to achieve are mostly based on the use cases presented above. \
+They are the following:
+\begin{enumerate}
+    \item live video feed from the drone to a web interface
+    \item full control of the drone from a web interface
+    \item recording capabilities for the live video feed
+    \item option to highlight people and show their names
+    \item limit of one active operator, with multiple passive operators having access to just the video feed
+\end{enumerate}
+
+\section{Non-Functional Requirements}
+\label{sec:non-functional-requirements}
+
+In software engineering, a non-functional requirement refers to a system's quality characteristics and attributes, \
+unlike functional requirements which refer to a system's functions. \
+Non-functional requirements are used to \
+evaluate all operations of the system, not just a specific component or behavior. \
+They can be split into 2 \
+categories: execution requirements (like security, performance) and evolution requirements (like scalability,
+testability, extensibility). \
+In the following subsections we will present in detail all the non-functional requirements.
+
+\subsection{Performance}
+\label{subsec:specification-performance}
+Performance is one of the most important requirements of the system and is measured in several possible ways:
+\begin{itemize}
+    \item Video latency
+    \item Video FPS
+    \item Response time to commands
+\end{itemize}
+
+The video latency is measured in milliseconds since the image displayed was taken. \
+Since the project won't be using 5G internet networks, but 4G LTE, I set out to achieve an average of \
+15FPS with a latency of 500ms and a command response time of 100ms.
+
+\subsection{Deployment}
+\label{subsec:deployment}
+The deployment will consist of hardware deployment (the drone itself plus its configuration) and software \
+deployment (the control UI and other proxy and processing servers). \
+The first step is the software deployment, which will be done in a kubernetes cluster. \
+This can be done with relative ease. \
+THe second step is the drone deployment, which includes a step for configuring the drone (writing the \
+ip address to which video feed will be sent and the ip address from which commands will be received).
+
+\subsection{Scalability and extendability}
+\label{subsec:specification-scalability}
+Scalability of the system refers to the ease with each the system can accommodate an increased \
+number of users and data from distributors without changing the core of the application. \
+On the one hand, the  application is centered on a single drone, with several possible operators. \
+On the other hand, the application will be deployed in a Kubernetes cluster, meaning a new instance can easily \
+be deployed for more drones.
+
+Extendability refers to the ease with which new functional requirements can be accommodate as \
+the number of users and their expectations increase.  % todo: update extendability
+
+\subsection{Usability}
+\label{subsec:specification-usability}
+% todo: complete usability
+
+\subsection{Security}
+\label{subsec:specification-security}
 
 
 
