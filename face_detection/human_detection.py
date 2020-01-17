@@ -53,10 +53,12 @@ class DetectorAPI:
         self.detection_scores = self.detection_graph.get_tensor_by_name('detection_scores:0')
         self.detection_classes = self.detection_graph.get_tensor_by_name('detection_classes:0')
         self.num_detections = self.detection_graph.get_tensor_by_name('num_detections:0')
+        # logger.info('Image tensor', self.image_tensor)
         logger.info('Detection boxes', self.detection_boxes)
         logger.info('Detection scores', self.detection_scores)
         logger.info('Detection classes', self.detection_classes)
         logger.info('Num detections', self.num_detections)
+        # exit(1)
 
     def process_frame(self, image):
         # Expand dimensions since the trained_model expects images to have shape: [1, None, None, 3]
@@ -101,10 +103,11 @@ times = []
 def main():
     # model_path = 'models/faster_rcnn_inception_v2_coco_2018_01_28/frozen_inference_graph.pb'
     # model_path = 'models/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb'
-    # model_path = 'models/ssdlite_mobilenet_v2_coco_2018_05_09/frozen_inference_graph.pb'
-    model_path = 'models/ssd_mobilenet_v2_coco_2018_03_29/frozen_inference_graph.pb'
+    model_path = 'models/ssdlite_mobilenet_v2_coco_2018_05_09/frozen_inference_graph.pb'
+    # model_path = 'models/ssd_mobilenet_v2_coco_2018_03_29/frozen_inference_graph.pb'
     odapi = DetectorAPI(path_to_ckpt=model_path)
     threshold = 0.7
+
 
     # how ssdlite actually works, expected data format/size
     # debugging: de cate ori se apeleaza reteaua, face cropping intern?

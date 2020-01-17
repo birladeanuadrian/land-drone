@@ -2,7 +2,6 @@ import * as dgram from 'dgram';
 import express from 'express';
 import SocketIO from "socket.io";
 import cors from 'cors';
-import * as wrtc from 'wrtc';
 
 const udpServer = dgram.createSocket('udp4');
 const app = express();

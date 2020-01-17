@@ -58,110 +58,52 @@ Three classes of drones emerge:
             the command link can be missing
 \end{enumerate}
 
-\section{}
+\section{Object Detection}
+\label{sec:research-object-detection}
+In recent years, convolutional neural networks have been used more and more in \
+the field of object detection. \
+According to ~\cite{deepLearning}, A convolutional neural network (CNN) is a \
+subclass of multilayer neural networks in which at least one layer applies \
+a convolution on its input data instead of matrix multiplication.\
+CNNs have seen a rise in use in object detection since 2012, when \
+a CNN developed by ~\cite{imagenet} won the ImageNet Large Scale Visual \
+Recognition Challenge for the first time. \
+The CNN managed to reduce the top-1 (actual label differs from predicted label) \
+ and top-5 (actual label is not in the predicted top 5 most likely labels) \
+error rates from 47.1\% respectively 28.2\% to 37.5\% respectively 17\%. \
+Additionally, the authors mentioned that the performance was limited by the \
+existing hardware and dataset
+Ever since, the contest has been won by convolutional neural networks. \
+By 2016, the top-5 error rate dropped to 3.6\%.
+
+% todo: move this to another chapter
+%In order for deep neural networks to be effective, they need to be trained on \
+%large datasets. \
+%Some common such datasets are:
+%\begin{itemize}
+%    \item the Microsoft COCO dataset ~\cite{COCO} (about 300k images, out of \
+%            which more than 200k are labeled)
+%    \item the KITTI dataset ~\cite{kitti}
+%    \item Open Images dataset ~\cite{openimages} (over 1.7 million images)
+%\end{itemize}
+%
+%A neural network takes a considerable amount of time to train on such datasets \
+%even with state-of-the-art hardware. \
+%For this reason, there are a number of pre-trained models available on the \
+%internet.
+
+In the paper~\cite{deepDrone}, the authors also attempt to create a drone capable \
+of detecting people, with a few differences:
+\begin{itemize}
+    \item the drone is an airborne one
+    \item image processing is done on the drone itself
+\end{itemize}
+
+% todo: mention SSD vs YOLO
 
 
-\section{Hyper Heuristics}
-\label{sec:research-hh}
-
-\subsection{General Presentation}
-\label{subsec:research-general-hh}
-
-In article ~\cite{MetaHeuristicsHandbook}, a hyper heuristic is defined as "\textit{a high-level approach that, \
-given a particular problem instance and a number of low-level heuristics, can select and apply an appropriate \
-low-level heuristic at each decision point}".\
-~\cite{MetaHeuristicsHandbook} also makes several classification of hyper heuristics by several criteria.
-
-\subsubsection{Classification}
-\label{subsubsec:research-hh-classification}
-
-Thus, according to ~\cite{soubeiga}, there are 2 types of hyper heuristics:
-\begin{enumerate}
-    \item \textbf{With Learning} These hyper heuristics make use of a history of low level heuristic efficiency \
-and use a learning mechanism to choose some low level heuristics more often than others. Furthermore, this \
-cathegory can be split into 2 sub-cathegories, according to the learning mechanism used:
-    \begin{enumerate}
-        \item \textbf{mechanisms using genetic algorithms}
-        \item \textbf{other mechanisms}
-    \end{enumerate}
-    This distinction can be made because a lot of hyper heuristics have been based at the time of ~\cite{soubeiga} \
-on genetic algorithms.
-    \item \textbf{Without Learning} There hyper heuristics use multiple low level heuristics, but select them in a \
-predefined sequence, no matter their efficiency
-\end{enumerate}
-
-~\cite{rbai} and ~\cite{pross} propose a different classification. \
-According to them, there are 2 types of hyper heuristics:
-\begin{enumerate}
-    \item \textbf{Constructive Hyper Heuristics} These hyper heuristics build a solution step by step by selecting \
-low level heuristics from a pool at every stage of the construction process.
-    \item \textbf{Local Search Hyper Heuristics} These hyper heuristics require a complete solution and select low \
-level heuristics to try and improve this solution
-\end{enumerate}
-
-According to ~\cite{MetaHeuristicsHandbook}, in the late 2000's a new classification of hyper heuristics emerged, \
-inspired by the use of generic programming in the development of hyper heuristics. \
-This classification was also mention independently in ~\cite{metabib01} and ~\cite{metabib10}. \
-In the new classification, there are also 2 types of hyper heuristics:
-\begin{enumerate}
-    \item \textbf{"\textit{heuristics to choose heuristics}"} (~\cite{MetaHeuristicsHandbook}) this type of hyper \
-heuristics is provided a set of pre-existing, well known low level heuristics for solving a problem, and the hyper \
-heuristics select one of these low level heuristics at each step.
-    \item \textbf{heuristics to build heuristics} this type of hyper heuristics generate new low level heuristics \
-from components or building blocks of known heuristics. It is these newly-built heuristics that will be applied by \
-the hyper heuristic.
-\end{enumerate}
-
-~\cite{metabib16} presents their own classification of hyper heuristics. \
-They identify 4 types:
-\begin{enumerate}
-    \item hyper heuristics that randomly choose low level heuristics
-    \item greedy and peckish hyper heuristics. This type require a pre-run evaluation of the subset of heuristics in \
-order to identify the best ones
-    \item meta heuristics-based hyper heuristics
-    \item hyper heuristics with a learning mechanism used in choosing low level heuristics
-\end{enumerate}
-
-~\cite{MetaHeuristicsHandbook} also proposes a new classification, starting from 2 criteria: \textit{the type of \
-heuristic search space} and \textit{source of feedback during learning}. \
-These criteria can be combined, with different sources of learning being applied to different types of heuristics \
-search spaces.
-
-Hyper-heuristics can be grouped into the following categories using the type of heuristic search space:
-\begin{enumerate}
-    \item \textbf{Selection Hyper-Heuristics} produce groups of already-existing low level heuristics
-    \item \textbf{Generation Hyper-Heuristics} produce new low level heuristics using basic building blocks
-\end{enumerate}
-
-Using the source of feedback criteria, hyper heuristics can be grouped into the following categories:
-\begin{enumerate}
-    \item \textbf{Online learning hyper heuristics} learn while solving a problem, similar to unsupervised learning in ml
-    \item \textbf{Offline learning hyper heuristics} learn from a set of training data, generating a rule that would \
-    apply to other data as well, similar to supervised learning in ml
-    \item \textbf{No learning hyper heuristics} no feedback source
-\end{enumerate}
 
 
-%todo: change sub section title
-\subsection{Other stuff}
-\label{subsec:research-other-stuff}
-
-There are multiple articles that prove the efficiency of hyper heuristics in optimization \
-problems, some of which will be presented below. \
-Additionally, we will present other methods for generating menus.
-
-In paper ~\cite{ekburke}, a possible hyper heuristic for solving optimization problems in \
-planning the scheduling of medical nurses is proposed. \
-The purpose of this algorithm wasn't to create an algorithm that is better than other algorithms for this \
-specific problem, but to create a method that works well enough, fast enough  and cheap enough for several \
-problems and domains. \
-Such a method could eventually end up as the basis for multiple cheap \
-optimization systems, available to a large number of consumers. \
-Additionally, in order to prove the large-scale applicability of of this methods, it was applied to \
-university class scheduling. \
-The new proposed approach used the same parameters as for scheduling timetable of medical nurses. \
-This confirms that the hyper heuristic is not sensitive to parameters when it comes to different types \
-of problems, thus having a considerable potential for generalization.
 
 
 

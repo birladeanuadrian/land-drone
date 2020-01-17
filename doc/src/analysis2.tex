@@ -1,0 +1,237 @@
+
+\chapter{Analysis and Theoretical Foundation}
+\label{ch:analysis}
+
+%Together with the next chapter takes about 60\% of the whole paper
+%
+%The purpose of this chapter is to explain the operating principles of the implemented application.
+%Here you write about your solution from a theory standpoint - i.e. you explain it and you demonstrate its theoretical properties/value, e.g.:
+%\begin{itemize}
+% \item used or proposed algorithms
+% \item used protocols
+% \item abstract models
+% \item logic explanations/arguments concerning the chosen solution
+% \item logic and functional structure of the application, etc.
+%\end{itemize}
+%
+%{\color{red} YOU DO NOT write about implementation.
+%
+%YOU DO NOT copy/paste info on technologies from various sources and others alike, which do not pertain to your project.
+%}
+
+%\section{Title}
+%\section{Other title}
+\section{Algorithms}
+\label{sec:analysis-algorithms}
+ The project uses several algorithms from several different computer \
+vision fields: object detection, object tracking and person recognition.
+
+\subsection{Object detection}
+\label{subsec:analysis-object-detection}
+For object detection I have chosen to use deep neural networks due to their \
+increased performance (speed and accuracy) compared to other ML-based algorithms.\
+More specifically, I decided to use the  MobileNetV2~\cite{mobilenet} neural \
+network with SSD (single shot detection). \
+MobileNet works as a feature extractor, with the output of its last layers \
+connected to the input of the SSD network.
+
+
+
+
+%\subsection{Image transmission}
+%\label{subsec:image-transmission}
+% I needed to devise an algorithm that would allow to one source to send images to several receivers that are
+% not on the same network and at considerable distances, and at the same time having a delay as small as possible.
+% Since the sender and the receivers won't be on the same network, they will need to interact via a 3rd component,
+% a server that runs in cloud.
+% The
+%
+%\subsection{Person Detection}
+%\label{subsec:person-detection}
+%Person detection consists of 2 phases: full person detection, and face detection. % maybe test just face detection
+%This is due to the fact that it's easier to detect and track a person than to detect and track a face.
+%For person detection I have chosen neural networks
+
+
+ According to [1], \ %todo: insert bib ref
+different low level heuristics behave differently in different environments, with some working better than others. \
+In order to rank low level heuristics, 2 evaluation functions are used: \textbf{competence} and \textbf{affinity}. \
+Competence describes how well a heuristic works on its own. \
+Affinity is a relationship between 2 low level heuristics \
+and describes how well a low level heuristic works when being applied after another low level heuristic. \
+This way, \
+when choosing a new low level heuristic to apply on the solution, we can use either competence or affinity to pick \
+one. \
+However, we also need to take into account the time passed since the low level heuristic was last used, otherwise \
+some low level heuristics would never be used. \
+The formula used for choosing a low level heuristic by competence is \
+the following:
+
+\( P(h) = \frac{C(h)}{\sum_{h_i \epsilon H} C(h_i)} * \Delta T_h \)
+
+Where $P(h)$ is the probability of choosing heuristic $h$, $C(h)$ is the competence is heuristic h and $H$ is the set \
+of all low level heuristics and $\Delta T_h$ is the time spent since the last time heuristic $h$ was last used. \
+This way, we ensure that all heuristics are used, and not just 2 or 3 that behave the best.
+
+The affinity formula used for choosing a heuristic is the following:
+
+\( P(h) = \frac{Aff(h_\alpha, h)}{\sum_{h_i \epsilon H} Aff(h_\alpha , h_i)} * \Delta T_h \)
+
+Where $P(h)$ is the probability of choosing heuristic $h$, $h_\alpha$ is the heuristic that was last applied, \
+$Aff(h_\alpha , h)$ is the affinity between heuristics $h_\alpha$ and $h$ and $\Delta T_h$ is the time spent since \
+heuristic $h$ was last used.
+
+Both the competence and the affinity must be initialized in a pre-run phase and then must be updated after each \
+heuristic is applied. \
+In order to initialize them, we need several sequences of heuristics that have behaved well or \
+simply better than other sequences. \
+We shall note the set of such sequences $\Theta$. \
+The formula for initializing the competence is the following:
+
+\( C(h_A) = \sum_{H \epsilon \Theta} \sum_{h_i \epsilon H} h_A == h_i ? 1 : 0 \)
+
+Basically, the above formula counts the number of times heuristic $h_A$ appears in the set of good heuristic \
+sequences. \
+The formula for initializing affinity is the following:
+
+\(  Aff(h_A, h_B) = \sum_{H \epislon \Theta} \sum_{i=1}^{len(H) - 2} \sum_{j=i+1}^{len(H) - 1} h_A == h_i \wedge \
+h_B == h_j ? \frac{1}{j - i} : 0 \) %todo: fix &&
+
+Thus, the affinity between 2 heuristics is maximum when they are placed one after another (are adjacent) and decrease \
+as the distance between them grows.
+
+In order to choose between competence and affinity when deciding which heuristics to use next, we can define a \
+constant $\alpha,  0 < \alpha < 1$, and then generate a random number between 0 and 1. \
+If the number is smaller than $\alpha$, we will use competence, otherwise affinity. %todo: validate statement with alpha
+
+
+\subsection{Simulated Annealing Meta Heuristic}
+\label{subsec:analysis-simulated-annealing}
+The term \textit{Simulated Annealing} originates from metallurgy, where \textit{annealing} refers to a technique that \
+consists of heating a material above its melting point and then gradually cooling it in order to reduce its defects \
+and increase the size of its crystals.
+In Computer Science, \textit{Simulated Annealing} is a simulation technique used to detect global optimum in an \
+environment with many local optimums.
+
+According to \cite{springer1}, \ %todo: fix citation and complete this
+
+
+\subsection{Proposed Hyper Heuristic}
+\label{subsec:analysis-proposed-hh}
+The proposed algorithm is a combination of the choice function hyper heuristic and the simulated annealing \
+meta-heuristic. \
+The algorithm steps can be found below: %todo: add label to algorithm
+
+\noindent\rule{\textwidth}{1pt}
+\begin{enumerate}[itemsep=1pt, parsep=1pt, topsep=1pt]
+    \item Generate an initial solution of the optimization problem, $sol_{domain}$, randomly
+    \item Generate a set of low level heuristics sequences randomly
+    \item Apply each sequence of the low level heuristic on the same $sol_{domain}$
+    \item \begin{enumerate}[itemsep=1pt, parsep=1pt, topsep=1pt]
+              \item The best resulting solution will be $sol_{domain\_opt}$
+              \item Save the best n sequences
+    \end{enumerate}
+    \item Using the best n sequences, initialize the competence and affinity using the equations presented above. %todo: link competence and affinity
+    \item Initialize temperature T
+    \item While the temperature T is above a certain threshold:
+    \item \begin{enumerate}[itemsep=1pt, parsep=1pt, topsep=1pt]
+              \item Pick a low level heuristic h using either competence or affinity
+              \item Apply h on $sol_{domain}$; the resulting solution will be $sol_{domain1}$
+              \item If $sol_{domain1}$ is better than $sol_{domain}$:
+              \begin{enumerate}[itemsep=1pt, parsep=1pt, topsep=1pt]
+                  \item Update the competence and affinity of heuristic h
+                  \item $sol_{domain}$ will take the value of $sol_{domain1}$
+                  \item if $sol_{domain1}$ is better than $sol_{domain\_opt}$, than $sol_{domain\_opt}$ will take the value of $sol_{domain1}$
+              \end{enumerate}
+              \item If $sol_{domain1}$ is not better than $sol_{domain}$
+              \begin{enumerate}[itemsep=1pt, parsep=1pt, topsep=1pt]
+                  \item $sol_{domain}$ will take the value of $sol_{domain1}$ with the probability $P = e^{\frac{-\Delta E}{T}}$
+              \end{enumerate}
+              \item Update the temperature $T = T - \Delta T$
+    \end{enumerate}
+\end{enumerate}
+\noindent\rule{\textwidth}{1pt}
+
+As can be seen from the algorithm, the choice function hyper-heuristic is used to select the next heuristic to be \
+applied on the solution, while simulated annealing is used to sometimes pick a worse solution in order to escape \
+local minimums. \
+The main idea of this algorithm is not to obtain the best solution possible, but a good enough \
+solution in a reasonable time.
+
+
+%todo: complete here
+\subsection{Abstract Models}
+\label{subsec:analysis-models}
+The search space is represented by meals. \
+These are characterized by multiple properties:
+\begin{itemize}
+    \item \textbf{Name} Name of the meal
+    \item \textbf{Type} Must be one of the following: \textit{Breakfast, First Snack, Lunch, Second Snack, Dinner}
+    \item \textbf{Distributor} A distribution company with an address from which meals will be delivered
+    \item \textbf{Nutritional components}
+    \item \textbf{Food Items} The raw ingredients the meal is made from.
+    \item \textbf{Reliability} is a combination of aspect, taste and smell
+    \item \textbf{Price}
+    \item \textbf{Time} Time it takes to cook and deliver the meal
+\end{itemize}
+A menu (recommendation) is made of 5 meals of different types: breakfast, first snack, lunch, second snack and dinner.
+
+
+
+
+\subsection{Low Level Heuristics}
+\label{subsec:analysis-llh}
+The proposed hyper heuristic uses 9 different low level heuristics, most of which were taken from genetic algorithms:
+\begin{itemize}
+    \item \textbf{Optimum Single Point Mutation} for each type of meal, it retrieves a meal from the database of the \
+same type. If the new meal is better than the current meal, than it replaces the current meal and then the heuristic \
+stops. If no new meal is better than its current equivalent, the current menu remains unchanged.
+    \item \textbf{Optimum Single Point Crossover} uses the optimum domain solution as a reference solution. For each \
+type of meal, it checks if the optimum solution meal is better than the current meal. If so, it replaces the current \
+meal with the optimum solution meal and then it stops. If no meal from the optimum solution is better than its current \
+equivalent, than the current meal remains unchanged.
+    \item \textbf{Optimum Multiple Point Mutation} is similar to the optimum single point mutation. the only \
+difference is that it doesn't stop once one meal has been replaced. If all new meals retrieved from the database are \
+better than their current equivalents, than all current meals will be replaced.
+    \item \textbf{Optimum Multiple Point Crossover} is similar to the optimum single point crossover, the only \
+difference being the same difference as between single point and multiple point mutation
+    \item \textbf{Random Single Point Mutation} replaces one random meal with a new one from the database. The new \
+meal doesn't have to be better than the current one.
+    \item \textbf{Random Single Point Crossover} replaces one random meal with a meal of the same type from the optimum \
+solution.
+    \item \textbf{Random Multiple Point Mutation} replaces all current meals with new one from the database
+    \item \textbf{Random Multiple Point Crossover} replaces the current menu with the optimum menu
+    \item \textbf{Memory Based Mutation} each time a meal is replaced with another meal, the difference in score \
+between the before and after menu is saved in a memory. This heuristic uses that memory to try and replace all meals \
+from the current solution with meals from memory that have yielded the largest score increase
+\end{itemize}
+
+%todo: complete this
+\section{User Profile}
+\label{sec:analysis-user-profile}
+The user profile consists of information about allergies to food items and nutrient intake values.
+
+%todo: retun here
+\section{Fitness Function}
+\label{sec:analysis-fitness}
+This Fitness function is ued to evaluate the quality of a menu or of a meal from a menu. \
+It is inverse proportional with te quality of a meal. \
+Thus, the better the meal/menu, the lower the fitness. \
+When computing the fitness of a menu, several factors must be taken into consideration:
+\begin{itemize}
+    \item \textbf{Nutritional values} for each meal type (breakfast, lunch, dinner, 2 snacks)
+    \item \textbf{Price} the price of the meal should not be much higher than the consumer desired price
+    \item \textbf{Time}
+    \item \textbf{Reliability}
+
+\end{itemize}
+
+\section{Structure of Application}
+\label{sec:analysis-structure}
+The application consists of 3 main components:
+\begin{itemize}
+    \item \textbf{Data Access Component} Is used to retrieve users, users profile and meals from database. This is a \
+            component used by multiple algorithms used to generate menus: choice function, cuckoo search.
+    \item \textbf{Main Algorithm} This is the hyper-heuristic algorithm used to generate a menu
+    \item \textbf{Web component} that all users (elders, nutritionists, distributors) will interact with.
+\end{itemize}

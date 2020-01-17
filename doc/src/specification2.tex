@@ -151,22 +151,13 @@ The project will need to meet the following use cases:
             \end{itemize}
 \end{itemize}
 
-
-\subsubsection{\textbf{Wildlife observation}}
-
-\textbf{Primary Actor:} Drone operator working for a wildlife observation organisation
-
-\textbf{Stakeholders and Interests:}
+% todo: go here
+The presented use cases can be applies in the following fields:
 \begin{enumerate}
-    \item Documentaries producers want to record animals in their natural habitat
-    \item Wildlife protection NGOs want to observe threatened animals and protect them from poachers
-\end{enumerate}
-
-\textbf{Preconditions:} The area where the drone will be deployed has decent internet coverage, with minimum 10Mbps upload speed
-
-\textbf{Main Success Scenario}  % todo: return here
-\begin{enumerate}
-    \item The drone is equipped with more powerful batteries
+    \item \textbf{Wildlife observation} the robot can be used to observe wild animals from a distance in areas with \
+        decent internet coverage (minimum 10Mbps upload speed) % todo: maybe update value
+    \item \textbf{Perimeter patrol} the robot can be used to patrol remote open areas where it's not possible to \
+        mount security cameras (forests, borders)
 \end{enumerate}
 
 
@@ -239,156 +230,4 @@ the number of users and their expectations increase.  % todo: update extendabili
 
 \subsection{Security}
 \label{subsec:specification-security}
-
-
-
-
-As stated above, the primary objective of \applicationTitle{} is to create a menu generator application that can solve \
-most of the problems of the other existing alternatives. \
-This will allow older people to maintain a healthy diet by offering them recommendations for meals for the entire day.
-
-In order to accomplish its purpose, the application needs to gather a certain amount of information about \
-each user. \
-This includes personal information (age, gender, weight, height, physical activity level). \
-In addition \
-to this the system also requires information about specific allergies (in order to exclude certain foods when generating \
-a menu) and about current chronic diseases (so that a nutritionist will be aware of them when validating the user \
-profile). \
-Using the information above, a profile is generated that include the body mass index (used to determine if a \
-person is normal weight, underweight, overweight or obese) and recommended nutrient, caloric, vitamin and mineral intake \
-for a day. \
-The recommended daily nutritional intake levels represent the amount of nutrients that are sufficient in order \
-to meet the requirements of 97\-98\% of healthy people. \
-However, no menu can be generated until the profile is reviewed \
-by a nutritionist.
-
-The information presented above will be the input to a choice-based algorithm that will generated an optimal recommendation for a \
-menu for a day. \
-The other inputs will include certain non-functional requirements (preferred price, delivery time, geographical \
-location of vendor). \
-Since one of the objectives of this system is to generated meals that can be delivered to the users' homes, \
-the system will require extensive information about local sellers. \
-This will include, along information about geographical \
-location, information about the meals they offer(type, price, cooking time, ingredients, nutritional values, weight). \
-This will require food vendors to have dedicated accounts in the system in order to edit their company's offers. \
-Using all \
-this information, an algorithm will compute the best possible menu to satisfy an elder's nutritional \
-daily intake requirements and non-functional requirements. \
-A use case diagram can be seen in figure 2.1 \ref{fig:usecase1}.
-A basic activity flow can be seen in diagram 2.2.
-
-\begin{figure}[ht]
-    \label{fig:usecase1}
-    %\centering
-    \includegraphics[width=15cm, height=50cm,keepaspectratio]{staruml/UseCaseDiagram1.png}
-    \caption{Use Case Diagram}
-\end{figure}
-
-\begin{figure}[ht]
-    \label{fig:activity1}
-    %\centering
-    \includegraphics[width=15cm, height=50cm,keepaspectratio]{staruml/ActivityDiagram1.png}
-    \caption{Use Case Diagram}
-\end{figure}
-
-However, all the information above leads to a very large search space, possibly leading to performance issues. \
-This makes an exhaustive search very time consuming, since there are very many possible combinations. \
-The users desire a fast way to \
-generate menus, especially if they don't like one of the menus generated and want to generate another one. \
-This is why I have decided to use a choice-function based hyper heuristic\
-\footnote{A high level hyper heuristic that applies other, low level heuristics on a search space}.
-
-
-\section{Functional Requirements}
-\label{sec:specification-functional}
-
-In software engineering, a functional requirement is a function of a system or its components. \
-Such a function consists of a specific set of inputs, a behavior and an output. \
-Functional requirements describe what the system \
-is expected to do in order to accomplish its purpose and reach the desired results.
-
-The functional requirements I have set out to achieve are mosyly based on the general objectives presented above.\
-First, the application requires extensive information about various food vendors and their offers, alongside some \
-personal information about the elder users. \
-Once the user data is in the database, the application should be able \
-to generate user profiles describing the recommended daily nutritional values.
-
-Ideally, there would be 3 types of users: elders, nutritionists and food distributors, each having to log in \
-into the application. \
-An elder should be able to edit his contact information, his personal health information, choose his nutritionist, \
-generate a menu for \
-a day and view the menu's properties (nutritional values). \
-A nutritionist should be able to view the elders who \
-have chosen him as their nutritionist, view the elder's personal information, edit the recommended nutritional \
-intake values and validate a certain user profile. \
-An elder cannot create a menu until his profile has been validated by a nutritionist. \
-Food distributors should be able to add, edit and delete meal packages.
-
-\section{Non-Functional requirements}
-\label{sec:specification-non-functional}
-In software engineering, a non-functional requirement refers to a system's quality characteristics and attributes, \
-unlike functional requirements which refer to a system's functions. \
-Non-functional requirements are used to \
-evaluate all operations of the system, not just a specific component or behavior. \
-They can be split into 2 \
-categories: execution requirements (like security, performance) and evolution requirements (like scalability,
-testability, extensibility). \
-In the following subsections we will present in detail all the non-functional requirements.
-
-\subsection{Security}
-\label{subsec:specification-security}
-%todo: fix man-in-the-middle
-The system is a Java web application, therefore using HTTP communication. \
-In order to prevent any \
-man-in-the-middle-attack, we can setup HTTP encryption either at Tomcat level, or setup a \
-reverse proxy using a second web server (Apache, Nginx) and set up encryption at the second web \
-server.
-
-Since the application deals with highly sensitive personal information (allergies, diseases), we \
-need to set up authentication and authorization. \
-Users need to login before they can interact further with the system. \
-We must also make sure that users can only see what they are supposed to see. \
-For example, we must make sure that food distributors cannot see user profiles. \
-Thus, we must create authorization levels for each type of user.
-
-In order to secure user data from the database in case of a breach, we will store user passwords \
-not in plain text, but as SHA-256 hash.
-
-\subsection{Performance}
-\label{subsec:specification-performance}
-Performance is one of the most important requirements of the system and is measured in several \
-possible ways:
-\begin{itemize}
-    \item Response time
-    \item Time to generate a menu
-    \item Quality of the generated menu
-\end{itemize}
-
-The web response time is a general non-functional requirement and refers to how long the user \
-must wait for a page to load and be fully functional. \
-In order to attract users, this time should be as low as possible. \
-Otherwise, users may decide to use other web applications that load faster.
-
-The time to generate a menu should also be short, no matter the search space. \
-This was one of \
-the primary requirements when designing and implementing the search hyper heuristic. \
-The quality of the generated menu is also important in order to evaluate the algorithm.
-
-\subsection{Scalability and extendibility}
-\label{subsec:specification-scalability}
-Scalability of the system refers to the ease with each the system can accommodate an increased \
-number of users and data from distributors without changing the core of the application. \
-Since \
-this is a web application, it can easily be scaled horizontally by adding more servers with a \
-high availability proxy in front.
-
-Extendibility refers to the ease with which new functional requirements can be accommodate as \
-the number of users and their expectations increase.
-
-\subsection{Usability}
-\label{subsec:specification-usability}
-One of the primary facts that has to be taken info consideration when designing and \
-implementing the application was that the main users will be elders, most of whom are \
-not very accustomed to technology. \
-This is why the application, and especially the side \
-that elders interact with, needs to be very intuitive and easy to understand.
+% todo: complete security
