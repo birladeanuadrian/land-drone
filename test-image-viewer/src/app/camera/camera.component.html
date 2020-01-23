@@ -1,0 +1,27 @@
+<!--<div id="app">-->
+<!--  <div><video #video id="video" width="640" height="480" autoplay></video></div>-->
+<!--  <div><button id="snap" (click)="capture()">Snap Photo</button></div>-->
+<!--  <canvas #canvas id="canvas" width="640" height="480"></canvas>-->
+<!--  <ul>-->
+<!--    <li *ngFor="let c of captures">-->
+<!--      <img src="{{ c }}" height="50" />-->
+<!--    </li>-->
+<!--  </ul>-->
+<!--</div>-->
+<webcam [height]="600" [width]="600" [trigger]="triggerObservable"
+    (imageCapture)="handleImage($event)" [videoOptions]="videoOptions"
+    [imageQuality]="1">
+</webcam>
+
+<button class="actionBtn" (click)="triggerSnapshot();">Take A Snapshot</button>
+
+
+<div class="snapshot" *ngIf="webcamImage">
+  <h2>Nice one!</h2>
+  <img [src]="webcamImage.imageAsDataUrl"/>
+</div>
+
+<!--<h4 *ngIf="errors.length > 0">Messages:</h4>-->
+<!--<ul *ngFor="let error of errors">-->
+<!--  <li>{{error | json}}</li>-->
+<!--</ul>-->

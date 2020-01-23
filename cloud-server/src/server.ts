@@ -24,7 +24,6 @@ udpServer.on('error', err => {
 });
 
 udpServer.on('message', (msg, rinfo) => {
-    // console.log('Packet received', msg.length);
     io.emit('packet', msg);
 });
 

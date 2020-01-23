@@ -1,15 +1,43 @@
 \chapter{Detailed Design and Implementation}
 \label{ch:implementation}
 
-Together with the previous chapter takes about 60\% of the paper.
+% todo: detaliere fiecare chema
 
-The purpose of this chapter is to document the developed application such a way that it can be maintained and \
-developed later. \
-A reader should be able (from what you have written here) to identify the main functions of the application.
+% results: rezultate intermediare, rezultate finale (hardware timp de raspuns, timp duratie transmitere, timp procesare imagine, tabele acuracy, procentaj detectie fete, procentaj recunoastere fete)
+% pe cd: cod + documentatie
+% gdpr compliance
 
-The chapter should contain (but not limited to):
-\begin{itemize}
-    \item a general application sketch/scheme,
-    \item a description of every component implemented, at module level,
-    \item class diagrams, important classes and methods from key classes.
-\end{itemize}
+\section{Introduction}
+\label{sec:implementation-introduction}
+This project contains 4 different components that are deployed in different \
+places:
+\begin{enumerate}
+    \item the robot application (deployed and running on the actual robot)
+    \item the proxy server that acts as an intermediary between the user \
+            controlling the robot and the robot; \
+            it runs in a kubernetes \
+            cluster in the cloud (GKE, more precisely)
+    \item an angular web application that is used to control the robot; \
+            it is \
+            deployed in the same cloud as the proxy server, but runs in the \
+            user's browser
+    \item the algorithm used to split an image into several UDP-ready packets \
+            and to reconstruct the image from said packets; \
+            the algorithm is published as a public package that is imported by \
+            both the robot application and the web application
+\end{enumerate}
+
+Each component's detailed design and implementation will be detailed below.
+
+%Together with the previous chapter takes about 60\% of the paper.
+%
+%The purpose of this chapter is to document the developed application such a way that it can be maintained and \
+%developed later. \
+%A reader should be able (from what you have written here) to identify the main functions of the application.
+%
+%The chapter should contain (but not limited to):
+%\begin{itemize}
+%    \item a general application sketch/scheme,
+%    \item a description of every component implemented, at module level,
+%    \item class diagrams, important classes and methods from key classes.
+%\end{itemize}

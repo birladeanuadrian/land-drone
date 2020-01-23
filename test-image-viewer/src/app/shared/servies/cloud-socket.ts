@@ -6,30 +6,31 @@ import {environment} from "../../../environments/environment";
 
 export class CloudSocket {
 
-  locationConnection: RTCPeerConnection;
-  remoteConnection: RTCPeerConnection;
-  sendChannel: RTCDataChannel;
+  private socket: io.Socket;
+  private udpPacker: UdpPacker;
 
   constructor(imageEmitter: ImageEmitter) {
-    this.locationConnection = new RTCPeerConnection();
-    this.remoteConnection = new RTCPeerConnection();
-    this.sendChannel = this.locationConnection.createDataChannel('videoChannel');
+    this.udpPacker = new UdpPacker(imageEmitter);
+    console.log('Connecting to io server', environment.ioServer);
+    this.socket = io(environment.ioServer);
+    this.socket.on('connect', () => {
+      console.log('Socket.IO connected');
+    });
+
+    this.socket.on('disconnect', () => {
+      console.log('Socket.IO disconnected');
+    });
   }
 
   listen() {
-    this.remoteConnection.ondatachannel = (ev => {
-      const receiveChannel = ev.channel;
-      receiveChannel.onmessage = (event2) => {
-        console.log('Data', event2.data);
-      };
-
-      receiveChannel.onopen = (event2) => {
-        console.log('Opened', event2);
-      };
-
-      receiveChannel.onclose = (event2) => {
-        console.log('Closed', event2);
-      }
-    });
+    this.socket.on('packet', (data) => {
+      this.udpPacker.addPacket(UdpPacket.fromBuffer(Buffer.from(data)));
+    })
   }
+
+  sendCommand() {
+
+  }
+
+
 }

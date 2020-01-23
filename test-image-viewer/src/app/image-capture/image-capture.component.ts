@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import * as tf from '@tensorflow/tfjs';
 import {loadGraphModel} from '@tensorflow/tfjs-converter';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
-import * as cv from 'opencv.js';
+// import * as cv from 'opencv.js';
 
 
 
@@ -17,6 +17,7 @@ export class ImageCaptureComponent implements OnInit {
 
   async executeCommands(imageElement: HTMLImageElement) {
     const modelUrl = 'http://localhost:4200/assets/models/model.json';
+    const canvas = document.getElementById('img-canvas');
     console.log('Image element', imageElement, imageElement );
     console.log('Instance', imageElement instanceof HTMLImageElement);
     // @ts-ignore
@@ -45,6 +46,7 @@ export class ImageCaptureComponent implements OnInit {
     }
 
     console.log('Average', times.reduce((acc, current) => acc + current) / times.length);
+    await tf.browser.toPixels(image, )
 
 
     // const pixelData =
