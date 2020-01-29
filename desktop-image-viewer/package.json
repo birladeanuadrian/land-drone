@@ -12,11 +12,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^8.0.0-beta.7",
     "electron-rebuild": "^1.9.0",
     "typescript": "^3.7.5"
   },
   "dependencies": {
+    "electron": "^8.0.0-beta.7",
     "opencv4nodejs": "^5.5.0",
     "socket.io": "^2.3.0",
     "socket.io-client": "^2.3.0",
