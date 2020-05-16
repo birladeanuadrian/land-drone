@@ -1,9 +1,10 @@
-FROM node:12.11.1-alpine
+FROM node:14.2.0-stretch-slim
 
 RUN mkdir /service
 WORKDIR /service
 
 COPY . .
+
 RUN npm install \
     && npm run compile \
     && npm prune --production
@@ -13,4 +14,4 @@ RUN rm -rf src
 EXPOSE 8080/tcp
 EXPOSE 5000/udp
 
-CMD ["npm", "start"]
+CMD ["node", "dist\main.js"]

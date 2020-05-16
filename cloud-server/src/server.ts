@@ -2,6 +2,9 @@ import * as dgram from 'dgram';
 import express from 'express';
 import SocketIO from "socket.io";
 import cors from 'cors';
+import {UdpPacker, UdpPacket, ImageEmitter} from 'udp-packer';
+import {EventEmitter} from 'events';
+import * as fs from 'fs';
 
 const udpServer = dgram.createSocket('udp4');
 const app = express();
@@ -9,6 +12,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded());
 
+const imageEmitter = new EventEmitter()
+const udpPacker = new UdpPacker(imageEmitter);
 const server = app.listen(8080, () => {
     console.log('HTTP server running');
 });
@@ -24,7 +29,12 @@ udpServer.on('error', err => {
 });
 
 udpServer.on('message', (msg, rinfo) => {
-    io.emit('packet', msg);
+    // io.emit('packet', msg);
+    udpPacker.addPacket(UdpPacket.fromBuffer(msg));
+});
+
+imageEmitter.on('image', (data: {timestamp: number, buffer: Buffer}) => {
+    fs.writeFileSync(`${data.timestamp}.jpeg`, data.buffer);
 });
 
 udpServer.on('listening', () => {
@@ -43,6 +53,8 @@ io.on('connection', function(socket){
 io.on('control-message', (msg: any) => {
     io.emit('drone-control', msg);
 });
+
+
 
 app.get('/', (req, res) => {
     res.send('Ok');

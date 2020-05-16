@@ -8,6 +8,9 @@ import argparse
 import pickle
 import cv2
 import os
+from mtcnn.mtcnn import MTCNN
+from box_converter import rectangle_to_recognition
+from db_driver import MongoDriver, ElasticDriver
 
 
 def main():
@@ -20,6 +23,8 @@ def main():
 	ap.add_argument("-d", "--detection-method", type=str, default="cnn",
 		help="face detection model to use: either `hog` or `cnn`")
 	args = vars(ap.parse_args())
+	detector = MTCNN()
+	db_driver = ElasticDriver()
 
 	# grab the paths to the input images in our dataset
 	print("[INFO] quantifying faces...")
@@ -43,11 +48,17 @@ def main():
 
 		# detect the (x, y)-coordinates of the bounding boxes
 		# corresponding to each face in the input image
-		boxes = face_recognition.face_locations(rgb,
-			model=args["detection_method"])
+		# boxes = face_recognition.face_locations(rgb,
+		# 	model=args["detection_method"])
+		faces = detector.detect_faces(rgb)
+		boxes = [rectangle_to_recognition(*tuple(x['box'])) for x in faces]
 
 		# compute the facial embedding for the face
 		encodings = face_recognition.face_encodings(rgb, boxes)
+		print('Encodings', len(encodings))
+		if not len(encodings):
+			continue
+		db_driver.add_face(name, encodings[0].tolist())
 
 		# loop over the encodings
 		for encoding in encodings:

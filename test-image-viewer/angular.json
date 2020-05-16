@@ -121,6 +121,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "test-image-viewer"
+    }
+  },
+  "defaultProject": "test-image-viewer",
+  "cli": {
+    "analytics": "39362eb3-43c1-41ff-b6fd-671bc4e96faf"
+  }
 }

@@ -23,7 +23,6 @@ export class ImageViewerComponent implements OnInit {
     this.angularImageEmitter = new AngularImageEmitter();
     this.imageReceiver = new CloudSocket(this.angularImageEmitter);
     this.imageReceiver.listen();
-    this.worker = new Worker('./image-receiver.worker', {type: 'module'});
   }
 
   ngOnInit() {
@@ -38,14 +37,12 @@ export class ImageViewerComponent implements OnInit {
     const canvas: HTMLCanvasElement = document.getElementById('img-canvas');
     const context = canvas.getContext('2d');
     cocoSsd.load({base: "lite_mobilenet_v2"}).then(model => {
-      // this.angularImageEmitter.on('image', data => {
-      this.worker.onmessage = (msg) => {
-        const data = msg.data;
-        console.log('Data', data);
-        this.delay = new Date().getTime() - data.timestamp;
+      this.angularImageEmitter.on('image', msg => {
+        const data = msg.buffer;
+        this.delay = Date.now() - msg.timestamp;
 
         const start2 = Date.now();
-        const imageData = "data:image/jpeg;base64," + data.buffer.toString('base64');
+        const imageData = "data:image/jpeg;base64," + data;
         this.sanitizer.bypassSecurityTrustUrl(imageData);
         this.image = imageData;
         const d = jpeg.decode(data.buffer);
@@ -63,7 +60,7 @@ export class ImageViewerComponent implements OnInit {
           context.stroke();
           console.log('Transformed jpeg', Date.now() - start2);
         });
-      };
+      });
     }).catch(err => console.error('Failed to load model', err));
 
   }

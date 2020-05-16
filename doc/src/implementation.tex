@@ -29,6 +29,28 @@ places:
 
 Each component's detailed design and implementation will be detailed below.
 
+\section{Robot Application}
+\label{sec:robot-application}
+I have chosen to run the robot application on a Raspberry PI 3 both \
+because of the support for high-level development languages (Python, \
+NodeJS, as opposed to VHDL/Verilog), and because of the support for \
+third party modules/application (in this instance, RabbitMQ).
+
+Physically, the robot consists of a platform with 4 wheels, a Raspberry PI, \
+batteries and a camera, all connected with wires.
+
+From a software point of view, it consists of 2 independent modules communicating \
+with one another via RabbitMQ queues. \
+The modules are engine control and external comms. \
+The engine control module controls the 4 wheels independently and can make the \
+robot go forward, reverse and steer. \
+The external comms has 2 roles: capture video from camera to transmit it to the \
+server, and listen for commands from the remote server in order to transmit them \
+to the engine control via RabbitMQ.
+
+Having separate processes leads to low couping and ensures that changes in one \
+component do not affect other components.
+
 %Together with the previous chapter takes about 60\% of the paper.
 %
 %The purpose of this chapter is to document the developed application such a way that it can be maintained and \
