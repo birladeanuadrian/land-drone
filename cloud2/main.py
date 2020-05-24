@@ -1,31 +1,19 @@
-import socket
-import cv2
-import numpy as np
+from multiprocessing import Queue
+from ws import WSServer
+from udp import UdpServer
 
-from image_unpacker import UdpPacket, UdpUnpacker
 
-localIp = '0.0.0.0'
-localPort = 5000
+def run():
 
-bufferSize = 1024
+    image_queue = Queue()
 
-server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-server.bind((localIp, localPort))
-unpacker = UdpUnpacker()
-print('Waiting for connections')
+    udp_server = UdpServer(image_queue)
+    ws_server = WSServer(image_queue, False)
+    udp_server.start()
+    ws_server.run()
 
-while True:
-    data: bytes = server.recv(1024)
-    print('Message size', len(data))
-    packet = UdpPacket(data)
-    img, ts = unpacker.add_packet(packet)
-    if not img:
-        continue
+    print('Waiting for connections')
 
-    d2 = np.frombuffer(img, dtype=np.uint8)
-    with open(f'{ts}.jpg', 'wb') as f:
-        f.write(img)
-    # cv_img = cv2.imdecode(d2, cv2.IMREAD_COLOR)
-    # print('Image', cv_img)
-    exit(1)
-    # cv2.imshow('image', cv_img)
+
+if __name__ == '__main__':
+    run()

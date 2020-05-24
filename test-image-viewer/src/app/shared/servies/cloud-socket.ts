@@ -12,28 +12,27 @@ export class CloudSocket {
 
   constructor(imageEmitter: ImageEmitter) {
     this.imageEmitter = imageEmitter;
-    // this.udpPacker = new UdpPacker(imageEmitter);
-    // console.log('Connecting to io server', environment.ioServer);
+
     this.socket = io(environment.ioServer);
     this.socket.on('connect', () => {
       console.log('Socket.IO connected');
+      this.socket.emit('event', {test: 23})
     });
 
     this.socket.on('disconnect', () => {
       console.log('Socket.IO disconnected');
+    });
+
+    this.socket.on('response', (...args) => {
+      console.log('Received data', args);
     });
   }
 
   listen() {
     this.socket.on('image', (timestamp: number, base64Image: string) => {
       // this.udpPacker.addPacket(UdpPacket.fromBuffer(Buffer.from(data)));
+      console.log('Received image', timestamp, base64Image);
       this.imageEmitter.emit('image', {timestamp, buffer: base64Image})
-    })
+    });
   }
-
-  sendCommand() {
-
-  }
-
-
 }
