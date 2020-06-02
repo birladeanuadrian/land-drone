@@ -28,6 +28,6 @@ class UdpServer(Process):
             if not img:
                 continue
             # d2 = frombuffer(img, dtype=uint8)
-            print('Adding new image')
+            # print('Adding new image')
             clear_queue(self.image_queue)
             self.image_queue.put([ts, img])

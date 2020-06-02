@@ -1,18 +1,17 @@
 from multiprocessing import Queue
-from ws import WSServer
 from udp import UdpServer
+from detector import HumanDetectorTracker
 
 
 def run():
-
     image_queue = Queue()
 
     udp_server = UdpServer(image_queue)
-    ws_server = WSServer(image_queue, False)
+    # ws_server = WSServer(image_queue, False)
+    # ws_server.run()
+    hdt = HumanDetectorTracker(image_queue)
     udp_server.start()
-    ws_server.run()
-
-    print('Waiting for connections')
+    hdt.run()
 
 
 if __name__ == '__main__':
