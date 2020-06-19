@@ -1,11 +1,52 @@
-<p>Live video</p>
-<p>Delay: {{delay}}</p>
+<!--<p>Live video</p>-->
+<!--<p>Delay: {{delay}}</p>-->
 <div>
   <img height="600" width="600" alt="Drone View" src="{{image}}" id="current-image">
-  <canvas width="600" height="600" id="img-canvas"></canvas>
 </div>
 
-<!--<div>-->
-<!--  <canvas width="600" height="600" id="img-canvas"></canvas>-->
-<!--</div>-->
+<div class="split left">
+  <div class="centered">
+    <h5>Live Stats</h5>
+    <table>
+      <tbody>
+      <tr>
+        <td>Total Delay:</td>
+        <td>{{delay}}</td>
+      </tr>
+      <tr>
+        <td>FPS:</td>
+        <td>{{fps}}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="split right">
+  <div class="centered">
+    <h5>
+      Average Stats (ms)
+    </h5>
+    <table>
+      <thead>
+      <tr>
+        <th> Avg Full Delay </th>
+        <th> Avg Cloud Receive Time </th>
+        <th> Average Cloud Processing Time </th>
+        <th> Average Client Receive Time </th>
+        <th> Average FPS </th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let avg of averages">
+        <td>{{avg.avgFullDelay}}</td>
+        <td>{{avg.avgCloudRecTime}}</td>
+        <td>{{avg.avgCloudProcTime}}</td>
+        <td>{{avg.avgClientRecTime}}</td>
+        <td> {{avg.fps}} </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 

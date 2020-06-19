@@ -1,0 +1,72 @@
+
+
+\chapter{User's manual}
+\label{ch:user-manual}
+
+\section{Deployment}
+\label{sec:user-manual-deployment}
+
+In order to run this project, someone needs to setup the following:
+\begin{enumerate}
+    \item A Drone with a Raspberry PI connected to the internet
+    \item A Cloud server to run proxy and image processor
+    \item A browser
+\end{enumerate}
+
+\subsection{Robot}
+\label{subsec:user-manual-robot}
+There are multiple ways to build a robot from a hardware perspective, \
+so I will focus on the software.
+The robot application requires the following to be installed:
+\begin{itemize}
+    \item python 3 (latest version)
+    \item nodejs (version 14 or later)
+    \item a rabbitmq server (with optional management interface)
+\end{itemize}
+%todo: maybe mention screen? how do I start the components
+
+
+\subsection{Cloud}
+\label{subsec:user-manual-cloud}
+The robot was tested using a server deployed on the Google Cloud,
+but any cloud provider can be used.
+The cloud components's requirements are at least 2 CPUs, 10GB RAM and
+a GPU.
+There are 2 ways to configure a virtual machine:
+\begin{enumerate}
+    \item Manually deploy and configure a virtual machine (the virtual \
+        machine needs to be configured according to the instructions in the \
+        Dockerfile)
+    \item Deploy a new instance from the already configured snapshot
+        (only works in Google Cloud, where the snapshot was created)
+\end{enumerate}
+Once the virtual machine has been fully configured, one needs to ssh into \
+it and manually start the components.
+
+\subsection{Browser}
+\label{subsec:user-manual-browser}
+A browser is required to view the video feed and control the drone.\
+It should preferably be on a desktop, since it offers a larger \
+viewport.
+
+\section{Operation}
+\label{sec:user-manual-operation}
+As soon as it starts, the robot should connect to the proxy server and \
+send images to the image processor, without any user input.
+In the browser, the image should appear soon after the robot starts.
+Before issuing any commands, one needs to first enter the controller \
+secret and login with it.
+Otherwise the control commands will not work.
+
+Below the video there is a table with the state of the robot: acceleration \
+and direction.
+In order to change acceleration, one should press one the \textit{-} or \
+\textit{+} buttons.
+As for direction, it can be changed by clicking on one of the two arrows.
+To start a recording, click on the button \textit{Start recording}, and to \
+stop it press on the button \textit{Stop Recording}.
+THe stop recording button will immediately start a browser download of the \
+video.
+
+In order to detect people, click on the button \textit{Detect People}, \
+and to stop detection click on the button \textit{Stop detection}.

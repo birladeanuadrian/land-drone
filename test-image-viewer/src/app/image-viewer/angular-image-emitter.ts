@@ -1,9 +1,15 @@
-import {ImageEmitter} from 'udp-packer';
-import {Buffer} from "buffer";
 
-export class AngularImageEmitter implements ImageEmitter {
+export interface ImageInfo {
+  buffer: string;
+  ts_drone_send: number;
+  delta_rec: number;
+  delta_proc: number;
+  ts_cloud_send: number;
+}
 
-  private onCallback: (data: {timestamp: number, buffer: Buffer}) => any;
+export class AngularImageEmitter {
+
+  private onCallback: (data: ImageInfo) => any;
   private eventTarget: EventTarget;
 
   constructor() {
@@ -13,13 +19,13 @@ export class AngularImageEmitter implements ImageEmitter {
     });
   }
 
-  on(type: 'image', func: (data: {timestamp: number, buffer: Buffer}) => any) {
+  // @ts-ignore
+  on(type: 'image', func: (data: ImageInfo) => any) {
     this.onCallback = func;
   }
 
-  emit(type: 'image', data: {timestamp: number, buffer: Buffer}) {
+  emit(type: 'image', data: ImageInfo) {
     const ev = new CustomEvent('image', {detail: data});
     this.eventTarget.dispatchEvent(ev);
   }
-
 }

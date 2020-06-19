@@ -17,7 +17,7 @@ I have chosen a land drone because it is both easier and more affordable to buil
 However, most components (cloud server, web interface, drone - server communication) can be reused \
 in order to build other types of drones (naval and flying drones).
 
-Additionally, the drone will have person detection and face recognition capabilities in order to \
+Additionally, the drone will have person detection capabilities in order to \
 meet certain security-related use cases, such as monitoring remote locations.
 
 The current state-of-the-art in remote controlled drones is met on military drones. \
@@ -152,10 +152,10 @@ The project will need to meet the following use cases:
 \end{itemize}
 
 % todo: go here
-The presented use cases can be applies in the following fields:
+The presented use cases can be applied in the following fields:
 \begin{enumerate}
     \item \textbf{Wildlife observation} the robot can be used to observe wild animals from a distance in areas with \
-        decent internet coverage (minimum 10Mbps upload speed) % todo: maybe update value
+        decent internet coverage (minimum 7.2Mbps upload speed) % todo: maybe update value
     \item \textbf{Perimeter patrol} the robot can be used to patrol remote open areas where it's not possible to \
         mount security cameras (forests, borders)
 \end{enumerate}
@@ -175,8 +175,8 @@ They are the following:
     \item live video feed from the drone to a web interface
     \item full control of the drone from a web interface
     \item recording capabilities for the live video feed
-    \item option to highlight people and show their names
-    \item limit of one active operator, with multiple passive operators having access to just the video feed
+    \item option to highlight people
+    \item limit of one active operator, with multiple passive operators having access to just the video feed, not the commands
 \end{enumerate}
 
 \section{Non-Functional Requirements}
@@ -222,12 +222,23 @@ On the other hand, the application will be deployed in a Kubernetes cluster, mea
 be deployed for more drones.
 
 Extendability refers to the ease with which new functional requirements can be accommodate as \
-the number of users and their expectations increase.  % todo: update extendability
+the number of users and their expectations increase.
+One obvious direction of extending is adding more transmission mediums.
+The current drone is designed to communicate using 4G LTE networks.
+However, users may want to control the drone via Bluetooth or radio waves.
+Therefore, the drone should be designed to easily accommodate these requirements.
 
 \subsection{Usability}
 \label{subsec:specification-usability}
-% todo: complete usability
+Usability is the capacity of a system to allow its users to perform their \
+tasks safely, effectively and efficiently, all the while offering an \
+enjoyable experience.
+
+In this project I aim to make the robot easy to control from any larger \
+terminal (tablet, laptop or PC) without imposing certain hardware requirements \
+from user devices (like having a state-of-the-art GPU).
 
 \subsection{Security}
 \label{subsec:specification-security}
 % todo: complete security
+to be completed

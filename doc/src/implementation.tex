@@ -15,16 +15,15 @@ places:
     \item the robot application (deployed and running on the actual robot)
     \item the proxy server that acts as an intermediary between the user \
             controlling the robot and the robot; \
-            it runs in a kubernetes \
-            cluster in the cloud (GKE, more precisely)
-    \item an angular web application that is used to control the robot; \
+            it runs in a google cloud virtual machine
+    \item an angular web client that is used to control the robot; \
             it is \
             deployed in the same cloud as the proxy server, but runs in the \
             user's browser
-    \item the algorithm used to split an image into several UDP-ready packets \
-            and to reconstruct the image from said packets; \
-            the algorithm is published as a public package that is imported by \
-            both the robot application and the web application
+    \item the cloud processor that reconstructs images sent by the robot, \
+            optionally detects/tracks people and then forwards them to the \
+            proxy server; for performance reasons, it runs on the same \
+            virtual machine as the proxy server
 \end{enumerate}
 
 Each component's detailed design and implementation will be detailed below.
@@ -33,23 +32,359 @@ Each component's detailed design and implementation will be detailed below.
 \label{sec:robot-application}
 I have chosen to run the robot application on a Raspberry PI 3 both \
 because of the support for high-level development languages (Python, \
-NodeJS, as opposed to VHDL/Verilog), and because of the support for \
+JavaScript, as opposed to VHDL/Verilog), and because of the support for \
 third party modules/application (in this instance, RabbitMQ).
 
-Physically, the robot consists of a platform with 4 wheels, a Raspberry PI, \
-batteries and a camera, all connected with wires.
+\subsection{Hardware}
+\label{subsec:implementation-robot-hardware}
+
+Physically, the robot consists of 2 modular platforms, 4 wheels with associated \
+DC engines, a Raspberry PI, a motor shield for the raspberry, batteries and a \
+camera, all connected with wires.
+The 2 modular platforms were joined with screws to form the chassis of the \
+robot.
+The 4 engines were attached to the chassis at both ends using screws, and the \
+rubber wheels were mounted on the engines.
+The Raspberry PI microcomputer was attached to one of the platforms forming the \
+chassis using screws.
+As for the motor shield, it came separately from the shield connector, so \
+I had to glue it to the shield connector with solder.
+Attaching the shield connector to the raspberry was simple, all I had to do was match \
+the pins.
+The motor shield has separate controls for 4 engines, along with pins for \
+current and ground.
+For this project, I used the current for motors to power the raspberry as well, \
+though for a production setup the raspberry should be powered by a different \
+set of batteries.
+The camera was attached to the raspberry using a flex cable connector.
+In order to reduce costs, I decided to use my phone as a 4G/LTE connector, however \
+there are modules to connect the Raspberry PI to 4G/ LTE (not GPRS, which is \
+considerably slower).
+The phone was connected to the raspberry using USB 2.
+In order to meet the recommended power requirements for the motors I needed \
+6 AA batteries.
+
+% todo: add robot image
+
+\subsection{Software}
+\label{subsec:implementation-robot-software}
 
 From a software point of view, it consists of 2 independent modules communicating \
-with one another via RabbitMQ queues. \
-The modules are engine control and external comms. \
-The engine control module controls the 4 wheels independently and can make the \
-robot go forward, reverse and steer. \
+with one another via RabbitMQ queues.
+The modules are engine control and external comms.
+The engine control module is implemented in python and controls the 4 wheels \
+independently and can make the robot go forward, reverse and steer.
+The motors themselves are controlled using the pip module \
+\textbf{adafruit\-circuitpython\-motorkit}, which is written by the company \
+that produced the motor shield.
+Using the module, each motors is assigned a positive throttle to move forward \
+and a negative throttle to go in reverse.
+However, after assembling the robot, I noticed that I mounted some motors in \
+reverse.
+In order to fix this issue, when assigning a throttle to a motor, I multiply \
+that throttle by an int representing the forward direction (1 or -1, \
+depending on the direction the motor was mounted).
+% todo: add motor class in appendix
+
+
+Using domain-driven design, I discovered that possible classes are Motor (DC Motor \
+controlling a wheel) and Engine, that controls all motors.
+The Motor class is an adapter for the Afadruit DCMotor class, and contains \
+the forward direction (1/-1) and a method to set speed.
+The Engine class has the four motors as properties and public methods to \
+fo forward, backward and steer.
+Since the motor location is important, each motor has its own instance variable.
+The class also contains a list with all motors, useful for setting the same \
+throttle to all motors.
+When going straight forward, backward or stopping, the same throttle is set on \
+all motors.
+When steering left, the motors on the left side are set a throttle smaller \
+than the one on the right side by a factor that depends on how much the \
+user wants the robot to steer.
+The mechanism for steering right is similar, except the motors on the right side \
+are assigned a smaller throttle.
+As mentioned in the analysis phase, the engine control component listens on \
+a queue, a RabbitMQ queue, more precisely, for commands.
+
+\begin{figure}[ht]
+    \label{fig:engine-class-uml}
+    %\centering
+    \includegraphics[width=15cm, height=30cm,keepaspectratio]{img/engine-class-uml.png}
+    \caption{Engine Control Class UML}
+\end{figure}
+
+
 The external comms has 2 roles: capture video from camera to transmit it to the \
 server, and listen for commands from the remote server in order to transmit them \
 to the engine control via RabbitMQ.
+I decided to have image transmission and commands listener in a single component \
+because they are logically related (they represent the interaction with the outside \
+world) and both depend on active internet connection.
+Once can easily notice that this component is event-based, reacting to either \
+external events (commands transmitted via websockets) or internal events (\
+a timer for transmitting new images).
+In Python, this would require 2 threads/processes, one for image transmission \
+and one for the command listener.
+However, since JavaScript is an event-driven language, it is better suited for \
+the tasks and can do both of them in a single thread.
+Still, the outer comms component was not written in plain JavaScript.
+It was written in TypeScript, which is a superset of JavaScript that \
+is more type-safe than plain JavaScript.
+Unlike JavaScript, TypeScript cannot be run directly, it must first be compiled \
+into JavaScript, which can then be run in the NodeJS runtime.
+The outer comms expects the commands to be json objects containing the direction \
+and the throttle for the engines.
 
-Having separate processes leads to low couping and ensures that changes in one \
-component do not affect other components.
+
+When developing the robot components, I connected the raspberry to my home \
+wireless router, and thus I was able to ssh into the raspberry, upload files \
+and start and monitor the components.
+However, after I connected the raspberry to the phone's 4G/LTE network, I \
+could no longer ssh into the robot, and had to find a new way to monitor \
+components and upload files.
+The solution I found was to assign the robot a DNS for dynamic IP from noip.com .
+This allowed me to open specific ports from the robot to the internet (mainly \
+22 for SSH and 15672 for RabbitMQ UI), so that I could access them from another \
+network (my home network).
+Even though the performance was far from ideal (for free tier), it was enough \
+in order to start/stop processes on the robot, view logs and inspect/publish rabbit \
+messages.
+
+
+\section{Proxy Server}
+\label{sec:implementation-proxy-server}
+The Proxy Server is the central component that intermediates the communication \
+between the robot and the controller.
+Similar to the robot outer comms component, it consists mainly \
+of reactions to events.
+These events are either http requests or websockets events.
+And just like the outer comms, the best language to develop the proxy server \
+is NodeJS.
+Since this component only redirects messages to other clients, it contains \
+no classes, just server declarations and message handling, probably being \
+the simplest component.
+However, this is the component that ties all the other components together.
+
+The Proxy Server runs in a virtual machine on Google Cloud.
+It requires the following ports to be open:
+\begin{itemize}
+    \item \textbf{TCP 22} used by the ssh server. Login is done using public-private keys
+    \item \textbf{TCP 8080} used by the HTTP and Websockets server
+    \item \textbf{UDP 5000} used by the cloud processor. More details on this in \
+            ~\ref{sec:implementation-cloud-processor}
+\end{itemize}
+
+The proxy allows all users who are aware of its existence to view the video \
+feed.
+However, it protects the commands and the video generator with two distinct keys.
+This way, it ensures that no one (not even a controller) can directly impersonate \
+the robot and transmit its own video feed.
+Having the controllers login before being able to issue commands ensures \
+that bystanders or other malicious people cannot hack the drone.
+
+The way the proxy server works is the following: (see figure ~\ref{fig:proxy-activity-diagram}):
+\begin{itemize}
+    \item After proxy startup, it waits for new websocket connections
+    \item Once a new connection has been initialized, that connection can \
+            begin receiving video feed
+    \item Each connection can attempt to authenticate with a secret token
+        \begin{itemize}
+            \item If the secret token belongs to the controller, the proxy server \
+                    begins accepting drone control events from that connection
+            \item If the secret token belongs to the cloud processor, the proxy \
+                    server begins accepting image events from that connection
+            \item If the secret token belongs to neither cloud processor nor controller, \
+                    it is invalid and the websocket connection is terminated
+        \end{itemize}
+    \item Authenticated connections are still valid to receive video feed
+    \item The proxy continues transmitting vide ofeed and redirecting commands until it \
+            receives a SIGINT signal and exits
+\end{itemize}
+
+\begin{figure}[ht]
+    \label{fig:proxy-activity-diagram}
+    %\centering
+    \includegraphics[width=10cm, height=20cm,keepaspectratio]{img/proxy-activity.PNG}
+    \caption{Proxy Server Activity Diagram}
+\end{figure}
+
+Whenever the proxy server receives an image event from the cloud processor, it \
+forwards that event to the connected clients.
+During implementation, I had to choose between 2 methods of delivering images \
+to the clients.
+The first method was to push images through websockets to the clients, which is \
+the method that was implemented in the end.
+The other method was to use multipart http response.
+In the multipart implementation, an http route is configured to send multiple \
+images to the caller (browser) up until the caller closes the connection.
+If a html image element had such a route as src, then the image would \
+update itself each time the server sent another image.
+Although the multipart implementation would considerably simplify the frontend \
+application (there would probably be no more need for websockets), I found that \
+it was more rigid than the websockets implementation.
+While websockets allows for random data to be passed to clients (like image, \
+time spent in processing, time the image was taken), the multipart implementation only allows \
+the image itself to be transmitted, without any other metadata.
+As this would have made it impossible to calculate the time by the image \
+in each phase of its existence (image creation, transport to cloud \
+processor, processing, transport to client), I decided to go with the \
+websocket-based transport.
+
+The proxy server was designed to run in NodeJS.
+Just like the outer comms component, it was written in TypeScript, which \
+was then compiled to JavaScript, which in turn could be run in NodeJS.
+
+The proxy server also contains an embedded HTTP server.
+This server has no active functionality, it is only required to setup \
+websockets on the server.
+
+Initially, both the proxy server and the cloud processor were designed to \
+run inside docker containers running on a Kubernetes cluster.
+However, after some initial tests, I decided against the idea.
+In order to run the 2 services as docker containers, I first had to \
+create a Kubernetes cluster consisting of at least 2 virtual machines.
+Once the cluster was created, several Kubernetes system pods were \
+automatically deployed on it.
+I decided it was more cost-effective to run both components on the same \
+virtual machine than running a Kubernetes cluster formed of 2 virtual \
+machines that also ran Kubernetes system pods besides my own pods.
+Still, I decided to leave the Dockerfiles, since they showed how each \
+component should be configured.
+
+
+
+\section{Web Client}
+\label{sec:implementation-web-client}
+The Web Client allows users to see the live video feed and issue commands.
+It is an Angular 9 application that uses Typescript and compiles to html, \
+css and javascript files optimized for browsers.
+The application consists of 2 separate angular components: image-viewer and \
+control.
+% todo: maybe return here
+
+
+Since both the image viewer and the control components rely on a websocket \
+connection to receive image, respectively transmit commands, I decided to \
+create an Angular singleton service which will handle all websocket communication.
+This service was named \textbf{CloudSocketService} (the suffix \
+\textit{Service} is added by default by Angular to all services).
+This service was then injected into both components.
+
+As for deployment, as I mentioned above, the Angular application is compiled \
+into several html, css and javascript files.
+I deployed these files on the same virtual machine on which the proxy server \
+and the cloud processor.
+They are served by an nginx web server.
+
+
+
+
+
+
+
+\section{Cloud Processor}
+\label{sec:implementation-cloud-processor}
+The cloud processor is the most complex component in the project.
+The overall logic can be seen in diagram ~\ref{fig:cloud-processor-activity-diagram}.
+
+\begin{figure}[ht]
+    \label{fig:cloud-processor-activity-diagram}
+    %\centering
+    \includegraphics[keepaspectratio]{img/cloud-processor-activity.PNG}
+    \caption{Cloud Processor Activity Diagram}
+\end{figure}
+
+As can be easily from the diagram, the cloud processor is composed of \
+two different mini-components: one component that listens for images \
+sent by the drone on a udp server, and one mini-component that \
+processes each image and forwards it to the proxy server.
+I considered splitting the cloud processor into 2 distinct components, \
+but in the end I decided to have the two mini-components form a single \
+component for the following reasons:
+\begin{enumerate}
+    \item \textbf{Resource use} If the 2 mini components were \
+            separate components, I would probably have needed a dedicated \
+            queue server (possibly rabbitmq); this server would have been \
+            deployed on the same virtual machine on which the two components \
+            would have run (thus increasing load on the machine), or in a \
+            separate virtual machine, thus increasing costs.
+    \item \textbf{Increased performance} Since the 2 mini-components are \
+            connected, they can share a memory queue;
+            this eliminates the overhead brought by network communication, \
+            increasing the processing speed for each image, and thus \
+            increasing throughput
+\end{enumerate}
+
+Since the two mini-components are connected, they should be \
+implemented in the same language.
+While the udp listener can be implemented in any language, the image \
+processor should be implemented in Python because of the very large \
+number of python libraries dedicated to image processing.
+
+
+The image processing mini-component is expected to run in parallel to the \
+component that parses the images.
+This way, while one component receives and processes udp frames, the \
+other component processes an already received image, increasing \
+throughput and FPS.
+Ideally, they would run in different threads, allowing them to share \
+memory.
+However, because of the Python GIL Lock
+\footnote{https://wiki.python.org/moin/GlobalInterpreterLock}, only one \
+thread in a process can execute at a time.
+This allows for concurrent, but not parallel execution of threads.
+
+As a result, the two mini-components will have to be run in different \
+processes, communicating with each other through a multiprocessing \
+queue.
+
+%todo: detail somewhere udp packing-unpacking algorithm
+
+\subsection{UDP Listener}
+\label{subsec:implementation-udp-listener}
+The UDP listener is more lightweight than image processor, so this will \
+be the component that will be started in a different process (the \
+\textit{UDPServer} class will extend the Python \
+\textit{multiprocessing.Process} class) and will receive in constructor \
+the multiprocessing queue in which it will write unpacked images.
+Min-component memory footprint is important because Python doesn't \
+implement the copy-on-write mechanism that is implemented by other \
+lanugages when it comes to creating new processes.
+Instead, Python pickles (serializes) all affected data and sends it \
+to the new process.
+
+\subsection{Image Processor}
+\label{subsec:implementation-image-processor}
+This mini-component is more heavy-weight than the udp listener \
+because it deals with the tensorflow and tensorflow-gpu libraries, \
+the latter of which cannot be pickled so that it can be sent to a \
+subprocess.
+
+In the processing phase, an object detection learning configured to \
+detect people is applied on the image.
+As mentioned in ~\ref{subsec:analysis-object-detection}, I decided to \
+use a MobileNet neural network thanks to its combination of speed \
+and relative precision.
+The specific network that I used was trained on images with size \
+300x300, so it is for this resolution that it will offer the best \
+performance.
+After having run some performance tests, I discovered that the neural \
+network offers similar performance to images sized 600x600 to images \
+sized 300x300.
+For this reason, the outer comms will cut the center rectangle of \
+size 600x600 from each image and only transmit that rectangle. % todo: this
+
+
+% todo: write other stuff
+ The image processor also contains an embedded web server through \
+which it can receive commands to start video recording, stop video \
+recording, run image processing on frames or stop image processing \
+on frames.
+
+
+
+
+
 
 %Together with the previous chapter takes about 60\% of the paper.
 %

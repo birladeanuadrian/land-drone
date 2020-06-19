@@ -1,7 +1,3 @@
-"""
-    1   Vehicle   4
-    2   Vehicle   3
-"""
 from motor import Motor
 
 
@@ -9,11 +5,11 @@ class Engine:
 
     def __init__(self, motor1: Motor, motor2: Motor, motor3: Motor, motor4: Motor):
         self.throttle = 0
-        self.motor1 = motor1
-        self.motor2 = motor2
-        self.motor3 = motor3
-        self.motor4 = motor4
-        self.all_motors = [self.motor1, self.motor2, self.motor3, self.motor4]
+        self.top_left_motor = motor1
+        self.bottom_left_motor = motor2
+        self.bottom_right_motor = motor3
+        self.top_right_motor = motor4
+        self.all_motors = [self.top_left_motor, self.bottom_left_motor, self.bottom_right_motor, self.top_right_motor]
 
     def forward(self, throttle):
         print('Forward', throttle)
@@ -43,12 +39,12 @@ class Engine:
             self._steer_right(direction)
 
     def _steer_right(self, intensity):
-        self.motor3.move(self.throttle * intensity)
-        self.motor4.move(self.throttle * intensity)
+        self.bottom_right_motor.move(self.throttle * intensity)
+        self.top_right_motor.move(self.throttle * intensity)
 
     def _steer_left(self, intensity):
-        self.motor1.move(self.throttle * intensity)
-        self.motor2.move(self.throttle * intensity)
+        self.top_left_motor.move(self.throttle * intensity)
+        self.bottom_left_motor.move(self.throttle * intensity)
 
     def stop(self):
         print('Stop')

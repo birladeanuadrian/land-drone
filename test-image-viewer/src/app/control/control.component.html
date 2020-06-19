@@ -1,0 +1,29 @@
+<h4>Control Panel</h4>
+<div>
+  <input [(ngModel)]="password" type="password" />
+</div>
+<button (click)="login()">
+  Login
+</button>
+<br/>
+
+<table>
+  <tbody>
+  <tr>
+    <td>Acceleration (% of power)</td>
+    <td> {{acceleration}}</td>
+    <td><button (click)="decreaseAcceleration()">-</button></td>
+    <td><button (click)="increaseAcceleration()">+</button></td>
+  </tr>
+  <tr>
+    <td>
+      Direction (negative values for left, positive for right)
+    </td>
+    <td>
+      {{direction}}
+    </td>
+    <td><button (click)="steerLeft()"><-</button></td>
+    <td><button (click)="steerRight()">-></button></td>
+  </tr>
+  </tbody>
+</table>

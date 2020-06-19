@@ -3,7 +3,24 @@ import tensorflow as tf
 from logger import logger
 from multiprocessing import Queue
 from numpy import frombuffer, uint8
+from image_transmitter import ImageTransmitter
 import cv2
+import time
+import traceback
+
+CLOUD_SERVER_SECRET = 'secret'
+
+# todo: maybe uncomment lines below
+# gpus = tf.config.experimental.list_physical_devices('GPU')
+# if gpus:
+#     try:
+#         for gpu in gpus:
+#             print('Process GPU', gpu)
+#             tf.config.experimental.set_virtual_device_configuration(
+#                 gpu,
+#                 [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=13312)])
+#     except RuntimeError as e:
+#         print(e)
 
 
 class DetectorAPI:
@@ -63,49 +80,70 @@ class DetectorAPI:
         self.default_graph.close()
 
 
-class HumanDetectorTracker:
+class ImageProcessor:
 
     def __init__(self, image_queue: Queue, threshold=0.7):
         model_path = 'models/ssdlite_mobilenet_v2_coco_2018_05_09/frozen_inference_graph.pb'
         self.odapi = DetectorAPI(path_to_ckpt=model_path)
         self.threshold = threshold
         self.image_queue = image_queue
+        self.track_people = False
+        self.record = False
+        self.image_transmitter = ImageTransmitter()
 
     def initialize_detector(self):
         test_image = cv2.imread('husky.jpg')
-        self.odapi.process_frame(test_image)
+        try:
+            self.odapi.process_frame(test_image)
+            pass
+        except Exception:
+            traceback.print_exc()
+            exit(1)
+
+    def start_record(self):
+        pass
+
+    def stop_record(self):
+        pass
 
     def run(self):
         self.initialize_detector()
-        print('Detector listens for images')
+        logger.info('Detector listens for images')
         while True:
-            [ts, jpeg_buffer] = self.image_queue.get()
-            d2 = frombuffer(jpeg_buffer, dtype=uint8)
-            img = cv2.imdecode(d2, cv2.IMREAD_COLOR)
+            [ts_drone_send, jpeg_buffer] = self.image_queue.get()
+            delta_proc = 0
+            now = int(time.time() * 1000)
 
-            boxes, scores, classes, num = self.odapi.process_frame(img)
-            drawing_boxes = []
-            human_boxes = []
+            delta_rec = now - ts_drone_send
 
-            for i in range(len(boxes)):
-                if classes[i] == 1 and scores[i] > self.threshold:
-                    box = boxes[i]
-
-                    x = box[1]
-                    y = box[0]
-                    width = box[3] - box[1]
-                    height = box[2] - box[0]
-                    cv2.rectangle(img, (x, y), (x + width, y + height), (0, 0, 255), 4)
-                    human_boxes.append((box[1], box[0], width, height))
-
-            print('TS', ts)
-            cv2.imshow('Now', img)
-            cv2.imwrite(f'{ts}.jpeg', img)
-            exit(1)
+            if self.track_people:
+                jpeg_buffer = self.process_image(jpeg_buffer)
+                now2 = int(time.time() * 1000)
+                delta_proc = now2 - now
+            self.image_transmitter.transmit_image(jpeg_buffer, ts_drone_send, delta_rec, delta_proc)
 
 
-# def test_object_detector():
+    def process_image(self, jpeg_buffer):
+        d2 = frombuffer(jpeg_buffer, dtype=uint8)
+        img = cv2.imdecode(d2, cv2.IMREAD_COLOR)
 
+        boxes, scores, classes, num = self.odapi.process_frame(img)
+        # drawing_boxes = []
+        human_boxes = []
+
+        for i in range(len(boxes)):
+            if classes[i] == 1 and scores[i] > self.threshold:
+                box = boxes[i]
+
+                x = box[1]
+                y = box[0]
+                width = box[3] - box[1]
+                height = box[2] - box[0]
+                cv2.rectangle(img, (x, y), (x + width, y + height), (0, 0, 255), 4)
+                human_boxes.append((box[1], box[0], width, height))
+
+        _, buf = cv2.imencode('.jpeg', img)
+        return buf.tostring()
 
 
 if __name__ == '__main__':

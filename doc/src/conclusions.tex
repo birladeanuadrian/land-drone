@@ -1,0 +1,170 @@
+
+\chapter{Conclusions}
+\label{ch:conclusions}
+
+\section{Personal Contributions}
+\label{sec:personal-contributions}
+
+In this project, my first contribution was to assemble the robot from \
+different parts bought online from multiple vendors.
+Assembling the robot was the first major milestone in the project, \
+since the rest of the project didn't make sense without it.
+Even though I encountered several minor issues (some pieces did not \
+match and I had to re-order them from another vendor), in the end the \
+robot and its processing unit were up \& running.
+
+The next major contribution was the design and implementation of the \
+image transmission algorithm.
+This also includes the proxy server that connects all components.
+The main factor I took into consideration was speed, so I tried to use \
+UDP where possible.
+And the only possible place was the drone-proxy communication. \
+For the rest of the communication, I used websockets, which is faster \
+than HTTP.
+I had to devise an algorithm that could pack a dozens KB jpeg image \
+into several 500-bytes buffers that could be safely sent over UDP, \
+and then rebuild the initial image from the UDP packets.
+
+
+\section{Achieved Results}
+\label{sec:conclusions-achieved-results}
+I managed to achieve most of the objectives I set up at the beginning.
+The drone is fully functional and responsive.
+Since it connects to internet via 4G/LTE, it is independent of the \
+controller's location (they could be on opposites sides of the world),
+though it does depend on someone to change its batteries when the time \
+comes.
+The drone offers a live video feed, can record video, can highlight \
+people on demand and has a limit of one active controller, with \
+multiple passive observers.
+
+When it comes to performance, I couldn't achieve a frame rate of 15 FPS.
+The best I could do is 12 FPS.
+However, the latency of the video is only 90-150 ms (depending on whether \
+image processing is enabled or not), well below the initial objective of \
+500ms.
+As for the command latency, it reached an average of 70ms, below the \
+set out objective of 100ms as well.
+
+The deployment was slightly modified from the version I set out to \
+build.
+If I wanted to run the cloud components in a Kubernetes cluster, \
+I would have had to create a cluster of at least 2 machines for only \
+2 components, thus wasting considerable resources.\
+So, I decided to deploy all components on a single virtual machine.
+In order to easily deploy new instances of the cloud components, \
+I created a snapshot of the configured virtual machine, so that \
+I am able to deploy new virtual machines from that snapshot.
+
+As for usability, the app can be used from any device, but the \
+UX has been considerably simplified and is fairly difficult to use.
+
+%todo: detail security
+
+
+\section{Further Development}
+\label{sec:conclusions-further-development}
+The first item that would need further attention is the security of the \
+udp server.
+Currently, there are 2 ways that it can be exploited by malicious actors:
+\begin{enumerate}
+    \item A hacker could buy the drone in order to reverse engineer \
+        the image transmission mechanism.
+        Once that happens, if he becomes aware of any other cloud servers \
+        for other drones (each drone has its own cloud server), he could \
+        transmit his own video to that server, and thus compromise the \
+        experience of other users
+    \item UDP packets are not encrypted, so they are prone to being \
+        hijacked and modified en route by malicious actors, thus both giving \
+        them access to the video feed, and allowing them to change the \
+        data being transmitted
+\end{enumerate}
+
+Both scenarios can be mitigated by encrypting UDP packets with keys that \
+are unique for every drone.
+More precisely, a TLS-like mechanism could be implemented, in which \
+the drone uses asymmetric encryption to securely negotiate a symmetric \
+key with the server.
+The symmetric key would be used to encrypt the udp packets and would have \
+a small TTL (possibly about one hour), after which a new symmetric key \
+would have to be negotiated.
+As for the communication between the image processor and the proxy \
+server, as long as they are on the same virtual machine encryption \
+is not necessary.
+For an attacker to intercept that communication, he would need to have \
+root access to the virtual machine, in which case he can directly have \
+access to the asymmetric keys.
+As for the communication between proxy server and the controller, \
+websockets can use the web server TLS encryption used for HTTP \
+communication.
+
+However, encrypting the udp packets will most likely lead to increased \
+size and thus to more packets and an even greater transport time.
+A possible solution to this would be to use IPv6 communication.
+While in IPv4 communication UDP packets should be maximum 500 bytes large \
+in order to be transmitted safely with great chances, IPv6 can transport \
+UDP packets as large as 1212 bytes.
+This almost doubling in size could support encrypting UDP packets without \
+significant performance loss.
+
+Concerning communication, another possible development direction would be \
+to replace the current websockets protocol to transfer images from proxy \
+server to the controller with webRTC (real-time-communication).
+This protocol was devised for live video calls, though it grew to \
+support other use-cases as well.
+Since it can use UDP sockets, it could provide a performance boost to \
+the overall application speed.
+
+
+As concerning image processing, there are two items which could be \
+improved/enhanced in the future.
+The first one is to add an optional object tracking feature that would \
+have to be enabled from the UI, like the object detection is.
+By combining the object detection and object tracking, we could obtain \
+more accurate results.
+Out of the 3 algorithms suggested here ~\ref{sec:research-tracking}, both \
+MOSSE and KCF are valid candidates, with approximately 0.3ms/frame/object, \
+respectively 2.44 ms/frame/object.
+CSRT would need approximately 30ms/frame/object, which would be an increase \
+of about 50\% of the time spent in the image processor.
+
+Another sub-direction of development in image processing would be \
+person recognition.
+This is would allow more security-related use-case and thus increase \
+the business value of the drone.
+For increased efficiency, it would be best to be implemented after \
+the tracking algorithms.
+By detection one person's movement across frames, we would no longer \
+have to run a more expensive facial recognition for that person \
+in every frame.
+
+A third direction of development for the robot is the addition of \
+a auto-pilot that could take the drone from a pair of geographical \
+coordinates to another pair.
+This would require multiple things:
+\begin{enumerate}
+    \item distance sensors for front, reverse and sides for the drone.
+    \item Drone GPS sensor to enable navigation
+    \item road-specific object detection algorithms (the robot should \
+            be able to detect roads, cars, people and so on)
+\end{enumerate}
+The auto-pilot program can reside either on the drone (where it would \
+probably consume more power and decrease autonomy) or in the cloud, from \
+which it could communicate to the drone via the proxy server.
+
+A final direction of development is the robot design.
+The robot is currently very fragile, with the processing unit, engines, \
+batteries and wires exposed.
+The robot could use a sturdier design that could protect the items \
+mentioned above.
+
+
+
+%About. 5\% of the whole
+%
+%Here your write:
+%\begin{itemize}
+%\item a summary of your contributions/achievements,
+%\item a critical analysis of the achieved results,
+%\item a description of the possibilities of improving/further development.
+%\end{itemize}

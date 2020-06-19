@@ -20,7 +20,7 @@ operates autonomously outside line of sight ir without supervision.
     \caption{Drone Uses according to ~\cite{ericsson1}}
 \end{figure}
 
-In ~\cite{ericsson1} mentions three different options for drone communication and control:
+In ~\cite{ericsson1} the author mentions three different options for drone communication and control:
 \begin{enumerate}
     \item \textbf{satellite technology} is currently in use today for some drones; \
             its drawbacks include high latency and costs and low throughput
@@ -76,6 +76,9 @@ existing hardware and dataset
 Ever since, the contest has been won by convolutional neural networks. \
 By 2016, the top-5 error rate dropped to 3.6\%.
 
+% todo: mention SSD vs YOLO
+
+
 In the paper~\cite{deepDrone}, the authors also attempt to create a drone capable \
 of detecting people, with a few differences:
 \begin{itemize}
@@ -83,13 +86,68 @@ of detecting people, with a few differences:
     \item image processing is done on the drone itself
 \end{itemize}
 
-% todo: mention SSD vs YOLO
+The authors designed an algorithm to detect and track a single person at a time.
+They used a Faster RCNN neural network to detect a person.
+Once the drone detected an object, it stopped applying the neural network on \
+new images.
+Instead, it applied a KCF tracking algorithm as longs as the object was still in \
+the image.
+Once the KCF algorithm detected that he object was no longer in the image, \
+the drone stopped applying the tracking algorithm and switched back to the \
+detection neural network.
+The authors also experimented with a YOLO detector, but they found that although it is \
+faster than Faster RCNN, it is less accurate, especially when it comes to small and \
+remote people.
 
+The authors tested the tracking and detection algorithms on multiple GPUs, with the \
+results shown in th table below:
 
+\begin{table}[ht]
+    \caption{Detection and Tracking Results}
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+        \hline\hline
+        Hardware Platform & GTX 980 & TX1 & TK1 \\
+        \hline
+        Power & 150W & 10W & 7W \\
+        Detection & 0.17s & 0.6s & 1.6s \\
+        Tracking & 5.5ms & 14ms & 14ms \\
+        \hline
+    \end{tabular}
+    \label{table:deep-drone-results}
+\end{table}
 
+Since the image processing is done on the drone itself, the power consumption of \
+the CPU and GPU must also be taken into consideration in order to determine the \
+autonomy of the drone.
 
+\section{Object Tracking}
+\label{sec:research-tracking}
+%todo: add introduction
+In ~\cite{OpencvTracking}, the author present a status of the most \
+popular tracking algorithms from opencv.
+After analysing multiple algorithms (CSRT, KCF, Boosting, MIL, TLD, \
+MedianFlow, MOSSE, GOTURN), the author comes to the following \
+conclusions:
+\begin{itemize}
+    \item \textbf{CSRT} should be used when higher tracking accuracy \
+            is required and the program can tolerate a smaller throughput
+    \item \textbf{KCF} should be used when the program requires greater \
+            throughput and faster FPS at the expense of a slightly \
+            lower accuracy
+    \item \textbf{MOSSE} should be used when the speed is of absolute \
+            importance
+\end{itemize}
 
-
+In ~\cite{OpencvTracking2} the author also compares the different \
+tracking algorithms, adding the FPS for each algorithm.
+The KCF tracker reached 409 FPS, but it failed to recover from full \
+object occlusion.
+The MOSSE tracker reached an astounding 2671 FPS, but it lacked \
+behind deep learning based trackers in performance.
+Even more, the author mentions that the algorithm looses precision \
+even for objects in normal movement.
+As for CSRT, it gives higher accuracy, but it reached only 32 FPS.
 
 
 %Bibliographic research has as an objective the establishment of the references for the \

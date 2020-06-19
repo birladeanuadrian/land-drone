@@ -1,5 +1,4 @@
 import socket
-from numpy import frombuffer, uint8
 from multiprocessing import Queue, Process
 from image_unpacker import UdpPacket, UdpUnpacker
 
