@@ -21,7 +21,8 @@ Additionally, the drone will have person detection capabilities in order to \
 meet certain security-related use cases, such as monitoring remote locations.
 
 The current state-of-the-art in remote controlled drones is met on military drones. \
-According to .. % todo: quote: https://www.forbes.com/sites/sebastienroblin/2019/09/30/dont-just-call-them-drones-a-laypersons-guide-to-military-unmanned-systems-on-air-land-and-sea/#76c957e62b00
+According to \
+\footnote{https://www.forbes.com/sites/sebastienroblin/2019/09/30/dont\-just\-call\-them\-drones\-a\-laypersons\-guide\-to\-military\-unmanned\-systems\-on\-air\-land\-and\-sea/\#76c957e62b00}
 the most popular control mechanisms are by radio and by satellite uplink. \
 While the radio control requires a certain proximity of the drone to the operator (i.e., 100 miles), \
 drones controlled via satellite uplink introduce a certain latency (image transmitted from a drone \
@@ -29,8 +30,7 @@ in Afghanistan may take up to 1.2 seconds to reach the operator in the US). \
 High-Speed internet might provide a third control mechanism, that could remove the range limitation \
 of the radio and decrease the latency of current satellite uplinks.
 
-% todo: return here at home
-Possible commercial use cases for this drone include wildlife observation,
+Possible commercial use cases for this drone are wildlife observation and perimeter patrol.
 
 
 \section{General Objectives}
@@ -151,11 +151,10 @@ The project will need to meet the following use cases:
             \end{itemize}
 \end{itemize}
 
-% todo: go here
 The presented use cases can be applied in the following fields:
 \begin{enumerate}
     \item \textbf{Wildlife observation} the robot can be used to observe wild animals from a distance in areas with \
-        decent internet coverage (minimum 7.2Mbps upload speed) % todo: maybe update value
+        decent internet coverage (minimum 7Mbps upload speed)
     \item \textbf{Perimeter patrol} the robot can be used to patrol remote open areas where it's not possible to \
         mount security cameras (forests, borders)
 \end{enumerate}
@@ -240,5 +239,19 @@ from user devices (like having a state-of-the-art GPU).
 
 \subsection{Security}
 \label{subsec:specification-security}
-% todo: complete security
-to be completed
+Security is one of the most important non-functional \
+requirements and is aimed at protecting the users of the \
+system as well as the system itself from non-authorized users \
+and malicious intents.
+In order to be secure, the application must meet the \
+following requirements:
+\begin{enumerate}
+    \item image transmission must be secured so that a \
+        man\-in\-the\-middle cannot see the live footage
+    \item drone control should be protected by authentication
+    \item the drone should be controlled by only one person \
+        at a time in order to prevent conflicting commands \
+        which could lead to the drone crashing
+    \item attackers must be prevented from overriding the \
+        robot's footage with their own footage
+\end{enumerate}

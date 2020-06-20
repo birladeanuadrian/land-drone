@@ -1,28 +1,79 @@
 \appendix
 \chapter{Relevant code}
+\label{ch:relevant-code}
 
+\section{Engine and Motor Control}
+\label{sec:annex-engine-motor-control}
 \begin{verbatim}
- /** Maps are easy to use in Scala. */
-object Maps {
-  val colors = Map("red" -> 0xFF0000,
-                   "turquoise" -> 0x00FFFF,
-                   "black" -> 0x000000,
-                   "orange" -> 0xFF8040,
-                   "brown" -> 0x804000)
-  def main(args: Array[String]) {
-    for (name <- args) println(
-      colors.get(name) match {
-        case Some(code) =>
-          name + " has code: " + code
-        case None =>
-          "Unknown color: " + name
-      }
-    )
-  }
-}
+from adafruit_motor.motor import DCMotor
+
+
+class Motor:
+
+    def __init__(self, adafruit_motor: DCMotor, forward=1):
+        self.motor = adafruit_motor
+        self.forward_direction = forward
+        self.throttle = 0
+
+    def move(self, throttle):
+        self.motor.throttle = throttle * self.forward_direction
+
+
+class Engine:
+
+    def __init__(self, motor1: Motor, motor2: Motor, motor3: Motor, motor4: Motor):
+        self.throttle = 0
+        self.top_left_motor = motor1
+        self.bottom_left_motor = motor2
+        self.bottom_right_motor = motor3
+        self.top_right_motor = motor4
+        self.all_motors = [self.top_left_motor, self.bottom_left_motor, self.bottom_right_motor, self.top_right_motor]
+
+    def forward(self, throttle):
+        print('Forward', throttle)
+        self.throttle = throttle
+        for motor in self.all_motors:
+            motor.move(self.throttle)
+
+    def reverse(self, throttle):
+        print('Reverse', throttle)
+        self.throttle = -1 * throttle
+        for motor in self.all_motors:
+            motor.move(self.throttle)
+
+    def steer(self, direction):
+        print('Steer', direction)
+        """
+        :param direction:
+            -1 -> left
+            1 -> right
+        :return:
+        """
+        if direction == 0:
+            self.forward(self.throttle)
+        elif direction < 0:
+            self._steer_left(direction * -1)
+        else:
+            self._steer_right(direction)
+
+    def _steer_right(self, intensity):
+        self.bottom_right_motor.move(self.throttle * intensity)
+        self.top_right_motor.move(self.throttle * intensity)
+
+    def _steer_left(self, intensity):
+        self.top_left_motor.move(self.throttle * intensity)
+        self.bottom_left_motor.move(self.throttle * intensity)
+
+    def stop(self):
+        print('Stop')
+        for motor in self.all_motors:
+            motor.move(0)
+
 \end{verbatim}
 
 \chapter{Other relevant information (demonstrations, etc.)}
+\label{ch:other-relevant}
 
 
 \chapter{Published papers}
+\label{ch:published-papers}

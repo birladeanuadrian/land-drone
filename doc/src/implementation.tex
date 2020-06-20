@@ -1,12 +1,6 @@
 \chapter{Detailed Design and Implementation}
 \label{ch:implementation}
 
-% todo: detaliere fiecare chema
-
-% results: rezultate intermediare, rezultate finale (hardware timp de raspuns, timp duratie transmitere, timp procesare imagine, tabele acuracy, procentaj detectie fete, procentaj recunoastere fete)
-% pe cd: cod + documentatie
-% gdpr compliance
-
 \section{Introduction}
 \label{sec:implementation-introduction}
 This project contains 4 different components that are deployed in different \
@@ -64,7 +58,20 @@ The phone was connected to the raspberry using USB 2.
 In order to meet the recommended power requirements for the motors I needed \
 6 AA batteries.
 
-% todo: add robot image
+\begin{figure}[ht]
+    \label{fig:robot1}
+    %\centering
+    \includegraphics[keepaspectratio]{img/robot1b.jpg}
+    \caption{Robot 1}
+\end{figure}
+
+\begin{figure}[ht]
+    \label{fig:robot2}
+    %\centering
+    \includegraphics[keepaspectratio]{img/robot2b.jpg}
+    \caption{Robot 2}
+\end{figure}
+
 
 \subsection{Software}
 \label{subsec:implementation-robot-software}
@@ -84,8 +91,6 @@ reverse.
 In order to fix this issue, when assigning a throttle to a motor, I multiply \
 that throttle by an int representing the forward direction (1 or -1, \
 depending on the direction the motor was mounted).
-% todo: add motor class in appendix
-
 
 Using domain-driven design, I discovered that possible classes are Motor (DC Motor \
 controlling a wheel) and Engine, that controls all motors.
@@ -149,6 +154,89 @@ network (my home network).
 Even though the performance was far from ideal (for free tier), it was enough \
 in order to start/stop processes on the robot, view logs and inspect/publish rabbit \
 messages.
+
+The robot is also the first component involved in determining the FPS rate, the \
+other component being the cloud image processor.
+The robot sets a timer at which it captures a new image and sends it to \
+the image processor.
+
+\subsubsection{UDP Packing-Unpacking algorithm}
+\label{subsubsec:udp-packing-algorithm}
+
+The UDP Packing\-Unpacking algorithm plays an important roles in the \
+system, since it handles the image transmission from the robot \
+to the cloud.
+The algorithm turns a buffer of variable size (the image to be \
+transmitted) into multiple small \
+buffers that are UDP-safe (from the size perspective), and can then \
+reconstruct the initial buffer.
+
+In order for a buffer to be sent successfully over UDP, it \
+cannot exceed a certain limit, which most people agree is \
+around 500 bytes.
+Thus, I had to split the original buffer into multiple small \
+buffer.
+However, since the UDP protocol doesn't guarantee the order of arrival \
+(or even the arrival for that matter), each packet must have \
+2 unique identifiers: an identifier for the buffer to \
+which it belongs (global identifier), and an identifier for \
+its place in the buffer (local identifier).
+I decided that a good option for the global identifier \
+would be the timestamp at which the image was taken, \
+expressed in milliseconds.
+As for the local identifier, I chose it to be an \
+increasing index for each packet.
+Additionally, in order to reconstruct the original buffer, \
+we would have to know the total number of packets from \
+that buffer.
+However, it only needs to be sent once, not with every \
+packet, so I decided it should be sent only with the \
+first packet (named head buffer).
+To sum up, the original buffer is split into several \
+mini\-buffers (packets) of about 500 bytes size, and each \
+packet has a header with its creation timestamp, \
+its order index and, in the case of the packets with \
+order index 0, the total number of packets.
+
+When receiving packets and reconstructing the image, \
+I also had to take into account that the packets will \
+probably come out of order.
+In order to easily group packets belonging to the same \
+original buffer, I created a Map in which the keys are \
+the buffer's timestamp, and the values are objects \
+that contain the total number of packets in the \
+original buffer (which can be determined once packet \
+0 arrives), and a list of the packets generated from \
+that buffer.
+Once all the packets from a buffer arrive, they are \
+ordered according to their local index, and the \
+original buffer can be reconstructed.
+
+
+
+\section{Web Server}
+\label{sec:web-server}
+Both the proxy server and the web client sit behind a reverse proxy.
+The reverse proxy's job is to handle TLS termination, and thus ensure that \
+the system is immune to man\-in\-the\-middle\-attacks.
+This is done primarily for the websocket server, since no information is \
+passed to the http server.
+The reverse proxy is also in charge of serving the web client files (html, \
+js, css), which are available on the \textit{/static/} location.
+The reverse proxy uses a self\-signed certificate.
+
+When it came to choosing a reverse proxy to deploy, I had two choices: \
+Apache and nginx.
+Although there are web servers exist, these two are the most popular \
+on the internet right now.
+According to \
+\footnote{https://www.hostingadvice.com/how\-to/nginx\-vs\-apache/} \
+and \footnote{https://www.tecmint.com/why\-nginx\-better\-than\-apache/}, \
+nginx is better suited among other things for serving static content and \
+for serving as a reverse proxy to an application server.
+These are the two use cases that I need a web server for, so I decided to \
+go with nginx.
+
 
 
 \section{Proxy Server}
@@ -260,8 +348,6 @@ It is an Angular 9 application that uses Typescript and compiles to html, \
 css and javascript files optimized for browsers.
 The application consists of 2 separate angular components: image-viewer and \
 control.
-% todo: maybe return here
-
 
 Since both the image viewer and the control components rely on a websocket \
 connection to receive image, respectively transmit commands, I decided to \
@@ -277,12 +363,7 @@ and the cloud processor.
 They are served by an nginx web server.
 
 
-
-
-
-
-
-\section{Cloud Processor}
+\section{Cloud Image Processor}
 \label{sec:implementation-cloud-processor}
 The cloud processor is the most complex component in the project.
 The overall logic can be seen in diagram ~\ref{fig:cloud-processor-activity-diagram}.
@@ -321,7 +402,6 @@ While the udp listener can be implemented in any language, the image \
 processor should be implemented in Python because of the very large \
 number of python libraries dedicated to image processing.
 
-
 The image processing mini-component is expected to run in parallel to the \
 component that parses the images.
 This way, while one component receives and processes udp frames, the \
@@ -338,8 +418,6 @@ As a result, the two mini-components will have to be run in different \
 processes, communicating with each other through a multiprocessing \
 queue.
 
-%todo: detail somewhere udp packing-unpacking algorithm
-
 \subsection{UDP Listener}
 \label{subsec:implementation-udp-listener}
 The UDP listener is more lightweight than image processor, so this will \
@@ -349,9 +427,24 @@ be the component that will be started in a different process (the \
 the multiprocessing queue in which it will write unpacked images.
 Min-component memory footprint is important because Python doesn't \
 implement the copy-on-write mechanism that is implemented by other \
-lanugages when it comes to creating new processes.
+languages when it comes to creating new processes.
 Instead, Python pickles (serializes) all affected data and sends it \
 to the new process.
+
+The UDP Listener is the second component involved in \
+deciding the FPS rate, after the robot software.
+The UDP listener, after having rebuilt an image, empties the \
+memory queue it shares with the processor.
+This is because the time it takes the processor to process an \
+image might be considerably higher than the time it takes \
+the udp listener to reconstruct image, thus making it \
+possible for images to accumulate in the queue.
+Since we are interested in live video feed, older images \
+are less important than new images, and as such they \
+can easily be deleted.
+Because some images might be randomly deleted, the final \
+FPS rate can be lower than the FPS rate set by the robot, \
+without any way to determine how much it can differ.
 
 \subsection{Image Processor}
 \label{subsec:implementation-image-processor}
@@ -371,8 +464,18 @@ performance.
 After having run some performance tests, I discovered that the neural \
 network offers similar performance to images sized 600x600 to images \
 sized 300x300.
-For this reason, the outer comms will cut the center rectangle of \
+For this reason, the outer comms will cut a center rectangle of \
 size 600x600 from each image and only transmit that rectangle. % todo: this
+During implementation I also found that tensorflow-gpu uses \
+lazy-loading for GPU(more specifically, NVIDIA) libraries.
+Because of this, when the object detection algorithm is applied \
+for the first time on am image, it may take several from seconds \
+to several dozens seconds for the GPU to initialize.
+In order to prevent images pilling up in the memory queue while \
+the GPU is being initialized, in the image processor constructor, \
+before the udp server is started, I process a default image (an \
+image of a Husky) so that the GPU can be safely initialized, and \
+when the first image arrives, it can be processed right away.
 
 
 % todo: write other stuff
@@ -381,7 +484,27 @@ which it can receive commands to start video recording, stop video \
 recording, run image processing on frames or stop image processing \
 on frames.
 
-
+\section{Cloud Deployment}
+\label{sec:implementation-cloud-deployment}
+As I mentioned before, I deployed the cloud component on the \
+Google Cloud Platform infrastructure, where I was able to use \
+their trial offer (giving me a specific sum that I could \
+to deploy anything for 12 months).
+I needed an linux virtual machine (Windows uses considerably \
+more resources than linux distributions) with at least 2 cores, \
+enough RAM for tensorflow and a GPU.
+After several tests, I discovered that the best option, \
+considering both resources and price, was an ubuntu virtual \
+machine with 2 cores, 11GB RAM and an NVIDIA Tesla T4 GPU \
+running on premium network.
+As for the virtual machine security, I had to open port 22 \
+for the SSH client, port 443 for the HTTPS connectins, and \
+port 5000 for the udp server.
+Once all cloud components were implemented and deployed, \
+I took a snapshot of the machine's disk, thus allowing \
+me to easily create new virtual machines from that \
+snapshot without having to reinstall and redeploy all \
+dependencies and components.
 
 
 

@@ -1,6 +1,100 @@
 
 \chapter{Testing and Validation}
+\label{ch:validation}
 
-About 5\% of the paper
-\section{Title}
-\section{Other title}
+\section{Hardware and Robot Testing}
+\label{sec:validation-hardware}
+During robot construction, the first step was to test each DC motor \
+individually.
+I connected each robot directly to batteries to make sure that \
+it works.
+After this step, the next testing step was when the drone was fully \
+assembled, and I needed to validate that it could go forward and backward.
+I placed the chassis on a small box so that the wheels remained in air \
+and the robot couldn't move,
+It was at this point that I discovered that some motors were placed in a \
+reverse direction and I needed to reverse their acceleration so that \
+they would go in the same direction as the other 2 motors.
+
+While developing the cloud components that interacted directly with the \
+robot, I connected the robot to the local Wi-Fi network.
+Only after having finished the robot and the cloud components did I \
+connect it to 4G.
+
+\section{Cloud and Web}
+\label{sec:validation-individual}
+
+The first software component to be implemented was the udp \
+packer-unpacker.
+I tested it by deconstructing and then reconstructing an image, \
+and after several optimizations, I managed to pack an image in nodejs \
+in 4 ms.
+
+The next major component was the image transmission.
+Its testing and development was done in 3 phases.
+During development and initial testing I used my laptop's camera \
+instead of the robot's with locally run image processor and proxy server.
+The testing procedure was to visually check the image and the transmission delay.
+A successful local test meant a transmission delay of less than 100ms with \
+an approximate 10 FPS.
+After I successfully tested locally, I deployed the proxy server and \
+the image processor in the cloud on a GCP virtual machine and reran the \
+tests.
+Finally, I deployed the image generator on the robot while connected to \
+the 4G and reran the tests.
+
+The object detection algorithm was tested separately on a local video.
+Several different algorithms were tested as well, but MobileNet had \
+the best speed/performance ratio.
+
+While testing the cloud image processor, I discovered that if the \
+frequency at which the drone sens images is \
+too large, a hidden occurs that causes the processor to freeze and \
+to stop processing any other images correctly, and as a result the \
+video in the browser freezes.
+My best guess is that the processor cannot read all udp packets in time, \
+leading udp packets to gather in an OS buffer.
+Shortly, the number of udp packets in the buffer becomes too high \
+and packets are dropped, which leads to the cloud processor becoming \
+unable of reconstructing images.
+However, more testing/deubgging is required in order to trace \
+the exact issue.
+
+\section{Final Measurements}
+\label{sec:final-measurements}
+
+At the end I took some final measurements checking the performance of \
+image and command transmission.
+I did the measurements both with and without TLS, to measure the effect \
+of encryption on performance, which I found to be negligible.
+For the tests, I took into consideration if object detection was enabled, \
+cloud processing times, total delay, FPS and the number of people in the \
+image (it could affect the performance of the object detection \
+algorithm).
+The results can be seen in table ~\ref{tab:final-results}
+
+\begin{table}[ht]
+    \caption{Final Performance Results}
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|}
+        \hline\hline
+        TLS & Detection & People & Image Processing Time & Total Delay & FPS \\
+        \hline
+        no  & yes & 1   & 60 & 133  & 9 \\
+        no  & yes & 2   & 64 & 137  & 9 \\
+        no  & yes & 0   & 59 & 132  & 9 \\
+        no  & no  & \_  & 0  & 65   & 10 \\
+        yes & no  & \_  & 0  & 67   & 11 \\
+        yes & yes & 1   & 58 & 128  & 10 \\
+        yes & yes & 0   & 55 & 123  & 10 \\
+        yes & yes & 2   & 58 & 127  & 10 \\
+        \hline
+    \end{tabular}
+    \label{tab:final-results}
+\end{table}
+
+As can be observed from the data, TLS doesn't seem to bring overhead.
+The smaller times for TLS could be caused by the iamge processor taking \
+less time to process the image.
+Additionally, the number of people in the image doesn't impact the \
+performance of the object detector.

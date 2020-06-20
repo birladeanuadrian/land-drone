@@ -25,6 +25,10 @@ I had to devise an algorithm that could pack a dozens KB jpeg image \
 into several 500-bytes buffers that could be safely sent over UDP, \
 and then rebuild the initial image from the UDP packets.
 
+I also had to tie in multiple geographically distributed components \
+written in multiple development languages (nodejs, python)with several \
+different protocols of communication (http, websockets, udp, amqp).
+
 
 \section{Achieved Results}
 \label{sec:conclusions-achieved-results}
@@ -46,6 +50,14 @@ image processing is enabled or not), well below the initial objective of \
 As for the command latency, it reached an average of 70ms, below the \
 set out objective of 100ms as well.
 
+Since the FPS rate has been lowered from 15 FPS to just 10 FPS, this \
+has also lowered the mobile network requirements.
+More specifically, considering an average image has a size of \
+about 60kb, with a 15 FPS rate, the network would have to support \
+7Mbps upload speed.
+However, for 15FPS rate, the network would only have to support \
+4.7 MBps upload speed, reducing requirements by about a third.
+
 The deployment was slightly modified from the version I set out to \
 build.
 If I wanted to run the cloud components in a Kubernetes cluster, \
@@ -59,7 +71,26 @@ I am able to deploy new virtual machines from that snapshot.
 As for usability, the app can be used from any device, but the \
 UX has been considerably simplified and is fairly difficult to use.
 
-%todo: detail security
+Concerning security, more than half of the initial objectives have \
+been met.
+By adding a controller password, I made sure that drone control was \
+limited to people with access codes, and by adding an image generation \
+password for transmitting images over websockets I made sure that \
+attackers couldn't directly send images their own video footage.
+By adding an nginx reverse proxy with TLS encryption on the proxy server, \
+I made sure that viewer/controller-server communication was encrypted, \
+thus making video, commands and password inaccessible to a third party.
+However, drone-server communication remained unencrypted, leaving the \
+door open for a visualizing and overriding drone footage.
+
+
+As for scalability, the system meets this requirement as well, with \
+primarily horizontal scalability.
+Since the drone:cloud-vm relationship is 1:1, more drones would \
+lead to more virtual machines being deployed.
+Since I took a snapshot of the virtual machine I configured, I can \
+easily deploy more virtual machines from that snapshot in a \
+matter of seconds, thus easily allowing more clients.
 
 
 \section{Further Development}
@@ -157,6 +188,9 @@ The robot is currently very fragile, with the processing unit, engines, \
 batteries and wires exposed.
 The robot could use a sturdier design that could protect the items \
 mentioned above.
+A possibility of improvement would also be the addition of multiple \
+batteries in parallel to increase their capacity (amperage rating ),
+thus extending the drone's lifetime.
 
 
 

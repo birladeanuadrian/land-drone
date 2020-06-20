@@ -211,7 +211,6 @@ network with SSD (single shot detection).
 MobileNet works as a feature extractor, with the output of its last layers \
 connected to the input of the SSD network.
 
-% todo: move this to another chapter
 In order for deep neural networks to be effective, they need to be trained on \
 large datasets. \
 Some common such datasets are:
@@ -226,8 +225,12 @@ A neural network takes a considerable amount of time to train on such datasets \
 even with state-of-the-art hardware. \
 For this reason, there are a number of pre-trained models available on the \
 internet.
+\footnote{https://github.com/tensorflow/models/blob/master/research/object\_detection/g3doc/detection\_model\_zoo.md} \
+contains a list of pre-trained models that could be used for object detection.
+The most efficient, taking into consideraiton both accuracy and execution \
+speed, seems to be \textbf{ssdlite\_mobilenet\_v2\_coco}, which is why I \
+chose to use it the drone.
 
-% todo: do something with the docs above
 \subsection{Object Tracking}
 \label{subsec:analysis-object-tracking}
 I also considered using tracking algorithms in conjunction \
