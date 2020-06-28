@@ -98,3 +98,25 @@ The smaller times for TLS could be caused by the iamge processor taking \
 less time to process the image.
 Additionally, the number of people in the image doesn't impact the \
 performance of the object detector.
+
+Since in the specifications I wrote that the aim of this project was \
+to design a system that would allow people to control a drone from \
+anywhere they are with any type of device, I decided to test the \
+feed video performance on a smartphone.
+I ran the tests on a Samsung S20 connected to the local wi-fi \
+network.
+The smartphone reported a total delay of 1.8 seconds, but when I \
+compared it to the video on the laptop I saw that they were \
+synchronized, with a delay of 70ms.
+The problem probably came from the fact that the laptop time was \
+synchronized with windows servers, while the smartphone \
+was sycnhronized with Samsung servers.
+If there was indeed an additional delay on the smartphone, it \
+wasn\'t one that could be observed with the eye.
+
+I decided to repeat the test with a Samsung A6+.
+This time, the smartphone reported a delay of -350ms,
+but when compared to the image on the laptop, it was \
+also synchronized.
+Though the results didn't directly show it, the tests were \
+a success.

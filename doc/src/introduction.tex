@@ -39,7 +39,24 @@ The highest values were achieved using 4G LTE and 4G LTE-A networks.
     \label{tab:internetspeed}
 \end{table}
 
-% todo: mention ml/deep learning
+\subsection{Cloud Computing}
+\label{subsec:cloud-computing}
+Cloud Computing first appeared in 2007, when Amazon AWS released EC2 (Elastic Compute \
+Cloud) to the general public.
+Since then, more and more companies decided to move their infrastructure from \
+on-premise to the cloud in order to save costs.
+This has lead to other companies offering services in the cloud computing domain, \
+among them Microsoft, Google and IBM.
+The chief advantage of cloud computing is that it abstracts away hardware, thus \
+eliminating the need of on-premise infrastructure engineers (actually replacing them \
+with cloud engineer) and making sure that hardware failures do not impact users' \
+businesses.
+Considering this, it might be a good idea to move image processing from an actual \
+drone to the cloud, thus making sure that should any accident happens to the drone, \
+the losses would be minimal (processing images on drone in real-time would probably \
+require a GPU, which is considerably more expensive than other parts of the robot).
+Additionally, removing the GPU from the drone would remove a significant consumer \
+of power, thus extending the autonomy of the drone.
 
 \subsection{5G}
 \label{subsec:5g}
@@ -99,7 +116,7 @@ data to a remote operator and to receive control commands from that operator.
 \end{figure}
 
 This use case can be extended to autonomous robots. \
-Instead of adding considerable computation capabilities to a robot (CPU, memory, GPU) os that it can run an AI, the \
+Instead of adding considerable computation capabilities to a robot (CPU, memory, GPU)oos that it can run an AI, the \
 robot could be fitted with minimal hardware designed only to transmit audio-video and receive commands from an AI that \
 runs in the cloud. \
 This way, if any malfunction occurs on the robot, the equipment could be easily replaced with lower costs because the \

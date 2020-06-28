@@ -157,7 +157,7 @@ class UdpUnpacker:
             packet_list.image_descriptor = packet.get_image_descriptor()
 
         if packet_list.image_descriptor and len(packet_list.packets) == packet_list.image_descriptor.no_pages:
-            sorted(packet_list.packets, key=lambda x: x.get_timestamp())
+            sorted(packet_list.packets, key=lambda x: x.get_page())
             image_data = b''.join([x.get_data() for x in packet_list.packets])
             del self.udp_map[ts]
             return image_data, packet_list.image_descriptor.timestamp

@@ -55,7 +55,7 @@ export class UdpPacket {
         return new UdpPacket(Buffer.concat([headerBuffer, data]));
     }
 
-    static parseTimestamp(timestamp: number): {seconds: number, ms: number} {
+    private static parseTimestamp(timestamp: number): {seconds: number, ms: number} {
         const seconds = parseInt(String(timestamp / 1000), 10);
         const ms = Number(timestamp) % 1000;
         return {seconds, ms};
@@ -68,10 +68,6 @@ export class UdpPacket {
         headerBuffer.writeUInt16LE(ms, 4);
         headerBuffer.writeUInt16LE(descriptor.page, 6);
         return new UdpPacket(Buffer.concat([headerBuffer, data]));
-    }
-
-    static fromBuffer(buffer: Buffer) {
-        return new UdpPacket(buffer);
     }
 
     isHeaderPacket() {
@@ -108,10 +104,6 @@ export class UdpPacket {
         } else {
             return this.buffer.slice(REGULAR_DATA_OFFSET);
         }
-    }
-
-    getBuffer(): Buffer {
-        return this.buffer;
     }
 
     getPage() {

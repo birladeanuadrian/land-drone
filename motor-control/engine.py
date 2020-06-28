@@ -39,10 +39,12 @@ class Engine:
             self._steer_right(direction)
 
     def _steer_right(self, intensity):
-        self.bottom_right_motor.move(self.throttle * intensity)
+        intensity = 1 - intensity
+        self.bottom_right_motor.move(self.throttle * (1 - intensity))
         self.top_right_motor.move(self.throttle * intensity)
 
     def _steer_left(self, intensity):
+        intensity = 1 - intensity
         self.top_left_motor.move(self.throttle * intensity)
         self.bottom_left_motor.move(self.throttle * intensity)
 

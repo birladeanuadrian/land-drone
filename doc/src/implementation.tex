@@ -3,10 +3,11 @@
 
 \section{Introduction}
 \label{sec:implementation-introduction}
-This project contains 4 different components that are deployed in different \
+This project contains 5 different components that are deployed in different \
 places:
 \begin{enumerate}
     \item the robot application (deployed and running on the actual robot)
+    \item A Web server that handles TLS termination
     \item the proxy server that acts as an intermediary between the user \
             controlling the robot and the robot; \
             it runs in a google cloud virtual machine
@@ -21,6 +22,15 @@ places:
 \end{enumerate}
 
 Each component's detailed design and implementation will be detailed below.
+A deployment diagram detailing the interactions between componetns can be found \
+in figure ~\ref{fig:deployment-diagram}
+
+\begin{figure}[ht]
+    \label{fig:deployment-diagram}
+    \centering
+    \includegraphics[keepaspectratio]{img/deployment4.PNG}
+    \caption{Deployment Diagram}
+\end{figure}
 
 \section{Robot Application}
 \label{sec:robot-application}
@@ -60,16 +70,23 @@ In order to meet the recommended power requirements for the motors I needed \
 
 \begin{figure}[ht]
     \label{fig:robot1}
-    %\centering
-    \includegraphics[keepaspectratio]{img/robot1b.jpg}
+    \centering
+    \includegraphics[keepaspectratio]{img/robot1d.jpg}
     \caption{Robot 1}
 \end{figure}
 
 \begin{figure}[ht]
     \label{fig:robot2}
     %\centering
-    \includegraphics[keepaspectratio]{img/robot2b.jpg}
+    \includegraphics[keepaspectratio]{img/robot2d.jpg}
     \caption{Robot 2}
+\end{figure}
+
+\begin{figure}[ht]
+    \label{fig:robot3}
+    %\centering
+    \includegraphics[keepaspectratio]{img/robot3d.jpg}
+    \caption{Robot 3}
 \end{figure}
 
 
@@ -91,6 +108,17 @@ reverse.
 In order to fix this issue, when assigning a throttle to a motor, I multiply \
 that throttle by an int representing the forward direction (1 or -1, \
 depending on the direction the motor was mounted).
+\begin{verbatim}
+class Motor:
+
+    def __init__(self, adafruit_motor: DCMotor, forward=1):
+        self.motor = adafruit_motor
+        self.forward_direction = forward
+        self.throttle = 0
+
+    def move(self, throttle):
+        self.motor.throttle = throttle * self.forward_direction
+\end{verbatim}
 
 Using domain-driven design, I discovered that possible classes are Motor (DC Motor \
 controlling a wheel) and Engine, that controls all motors.
@@ -103,11 +131,43 @@ The class also contains a list with all motors, useful for setting the same \
 throttle to all motors.
 When going straight forward, backward or stopping, the same throttle is set on \
 all motors.
+The left/right direction is controlled by a float variable that can take values \
+between 1 and -1.
+Positive values represent a right direction (with 1 being max \
+right), while negative values represent a left direction (with -1 \
+being max left).
 When steering left, the motors on the left side are set a throttle smaller \
 than the one on the right side by a factor that depends on how much the \
 user wants the robot to steer.
 The mechanism for steering right is similar, except the motors on the right side \
 are assigned a smaller throttle.
+\begin{verbatim}
+def steer(self, direction):
+    print('Steer', direction)
+    """
+    :param direction:
+        -1 -> left
+        1 -> right
+    :return:
+    """
+    if direction == 0:
+        self.forward(self.throttle)
+    elif direction < 0:
+        self._steer_left(direction * -1)
+    else:
+        self._steer_right(direction)
+
+def _steer_right(self, intensity):
+    intensity = 1 - intensity
+    self.bottom_right_motor.move(self.throttle * (1 - intensity))
+    self.top_right_motor.move(self.throttle * intensity)
+
+def _steer_left(self, intensity):
+    intensity = 1 - intensity
+    self.top_left_motor.move(self.throttle * intensity)
+    self.bottom_left_motor.move(self.throttle * intensity)
+
+\end{verbatim}
 As mentioned in the analysis phase, the engine control component listens on \
 a queue, a RabbitMQ queue, more precisely, for commands.
 
@@ -160,8 +220,11 @@ other component being the cloud image processor.
 The robot sets a timer at which it captures a new image and sends it to \
 the image processor.
 
-\subsubsection{UDP Packing-Unpacking algorithm}
-\label{subsubsec:udp-packing-algorithm}
+\section{UDP Packing-Unpacking algorithm}
+\label{sec:udp-packing-algorithm}
+
+\subsection{Overview}
+\label{subsec:udp-pack-overview}
 
 The UDP Packing\-Unpacking algorithm plays an important roles in the \
 system, since it handles the image transmission from the robot \
@@ -193,7 +256,7 @@ However, it only needs to be sent once, not with every \
 packet, so I decided it should be sent only with the \
 first packet (named head buffer).
 To sum up, the original buffer is split into several \
-mini\-buffers (packets) of about 500 bytes size, and each \
+mini\-buffers (packets) of about 400 bytes size, and each \
 packet has a header with its creation timestamp, \
 its order index and, in the case of the packets with \
 order index 0, the total number of packets.
@@ -212,6 +275,233 @@ Once all the packets from a buffer arrive, they are \
 ordered according to their local index, and the \
 original buffer can be reconstructed.
 
+\subsection{Algorithm}
+\label{subsec:udp-packer-algorithm}
+I have described the packing and the unpacking algorithms in the \
+pseudo-code samples below, which are similar to python.
+
+\begin{verbatim}
+    // Image deconstruction algorithm psesudo-code
+    // jpeg is the buffer to be decomposed
+    timestamp = int(time.time() * 1000)
+    udpPackets = []
+    initialDataSize = PACKET_MAX_SIZE - HEADER_PACKET_HEADER_SIZE
+    dataBuffer = jpeg[0:initialDataSize]
+    udpPackets.push(new HeaderPacket(dataBuffer, timestamp, len(jpeg))
+    page = 1
+    dataPacketSize = PACKET_MAX_SIZE - DATA_PACKET_HEADER_SIZE
+    jpegOffset = initialDataSize
+
+    while True:
+        end = min(jpegOffset + dataPacketSize, len(jpeg))
+        currentBuffer = jpeg[jpegOffset:end]
+        udpPackets.push(new DataPacket(currentBuffer, timestamp, page))
+        page++
+
+        if end == len(jpeg):
+            break
+        else:
+            jpegOffset = end
+\end{verbatim}
+
+\begin{verbatim}
+    // Image reconstruction algorithm
+    packetMap = new HashMap()
+    while True:
+        packet = readPacket()
+        timestmap = packet.readTimestamp()
+        if timestmap not in packetMap:
+            packetList = new PacketList()
+            packetMap.put(timestmap, packetList)
+        else:
+            packetList = packetMap.get(timestamp)
+
+        packetList.packets.push(packet)
+        if not packetList.imageDescriptor and packet.isHeaderPacket():
+            packetList.imageDescriptor = packet.getImageDescriptor()
+
+        if packetList.imageDescriptor and len(packetList.packets) == packetList.imageDescritptor.noOfPages:
+            sort(packetList.packets, by=lambda x: x.readPage())
+            imageData = [x.getData() for x in packetList.packets].join(b'')
+            delete udpMap[timestamp]
+            emit(imageData, timestamp)
+\end{verbatim}
+
+\subsection{Implementation}
+\label{subsec:udp-packer-implementation}
+As for the actual implementation, I had to write the same algorithm \
+twice.
+Since the robot's outer comms component would be in charge of sending \
+images, the first implementation would have to be in NodeJS.
+Technically, I only needed to implement the packing part of the \
+algorithm, which generates the udp packets from the image buffer.
+However, in order to validate that the algorithm works, I had to \
+implement the unpacking as well in order to make sure the udp packets \
+are valid and that the original image can be reconstructed.
+Then I had to re-implement the unpacking in python so that the \
+image processor can read the udp packages and reconstruct the \
+original image as well.
+Since by this time I had already finished the NodeJS algorithm, I \
+no longer had to re-implement the packing in python, since I could \
+use the packets generated in NodeJS.
+
+The actual UML class diagrams for the NodeJS implementations can be found \
+in figure ~\ref{fig:udp-packer-class-uml}.
+Unlike other languages like Java (where interfaces are used to specify common \
+behavior for polymorphism) or Python (which doesn't even have interfaces), \
+in TypeScript, interfaces can be used both for polymorphism and for describing \
+data types in JSON format, with all properties being public.
+Another difference from Java is the \textbf{?} operator used for the property \
+\textit{imageDescriptor} in the interface \textit{UdpPacketList}.
+This is used to mark the property as optional, since when first constructing the \
+\textit{UdpPacketList} when the first packet from the image arrives, we don't \
+know if that is the header packet, which is the only one who can generate an \
+image descriptor.
+
+As convention, private properties and methods are marked with a \textbf{\-}, \
+while public properties and methods are marked with a \textbg{\+}.
+Static methods are underlined.
+
+In the \textit{UdpPacket} class, the \textit{buffer} property is a binary buffer \
+that contains both headers and actual data.
+The first two static methods, \textbf{headerPacket} and \textbf{dataPacket}, act \
+as constructors because TypeScript doesn't allow multiple constructors for a class.
+Another option would have been to make the \textit{UdpClass} abstract and create \
+another two classes that would extend the base class: \textit{HeaderUdpPacket} \
+and \textit{DataUdpPacket}.
+However, the two types of packets were too similar and had very few differences, \\
+so I decided to go with different constructors.
+The method \textit{getImageDescriptor} throws an error if the packet is not a \
+header packet.
+The class constructor is private and only accepts the full buffer that \
+contains both the data and the headers.
+Since the class\' only private property is the full buffer, all getters from \
+it need to read binary data from the buffer and then decode it.
+
+In the \textit{UdpPacker} class, the property \textit{udpMap} is a Javascript \
+Map object (similar to Java HashMap), which is faster than the commonly-used \
+object for retrieving key-value data.
+The \textit{imageEmitter} property is an instance of the NodeJS-specific \
+\textit{EventEmitter} class (since this is NodeJS-specific, it won't work \
+by default in the browser, though some frontend frameworks have their \
+own custom implementation of EventEmitter).
+The \textit{EventEmitter} class is part of the NodeJS implementation of the \
+Observer Pattern, which allows other micro-tasks to wait for an event and its \
+associated data (the observable object decides what data is associated to each \
+event) from the observable micro-task to occur.
+However, the observers do not execute immediately, but only when the active \
+micro-task finishes executing.
+This allows multiple micro-tasks to wait for a specific event.
+The static \textit{pack()} method packs a buffer into multiple udp packets.
+The \textit{addPacket()} method adds a packet to the udpMap and, when it \
+discovers that all the packets from an image have been received, emits an event \
+with that image and its timestamp on the imageEmitter.
+
+The Python implementation is somewhat similar to the NodeJS one, with a few \
+exceptions generated by the difference in technologies.
+First of all, \textit{ImageDescriptor}, \textit{PacketDescriptor} and \
+\textit{UdpPacketList} are classes, since Python doesn't support interfaces.
+The \textit{UdpPacket} class is almost identical to the NodeJS implementation.
+As for the \textit{UdpPacker} class, it has been renamed in Python into \
+\textit{UdpUnpacker} (since packing wasn't implemented).
+The \textit{udpMap} property is now a Python dict, while the \
+\textit{imageEmitter} property doesn't exist (since Python doesn't have \
+JavaScript's asynchronous code execution).
+The \textit{pack()} method doesn't exist, while the \textit{addPacket} method \
+returns a tuple which can contain the image buffer and timestamp, if the \
+added packet is the last packet to arrive from an image, or an empty buffer \
+and 0 for timestamp.
+
+
+\begin{figure}[ht]
+    \label{fig:udp-packer-class-uml}
+    %\centering
+    \includegraphics[width=15cm, height=30cm,keepaspectratio]{img/udp-packer-uml-class.png}
+    \caption{Udp Packer-Unpacker UML Class Diagram}
+\end{figure}
+
+\subsection{Encoding}
+\label{subsec:udp-packer-encoding}
+In order to minimize the number of created udp packets, the headers must take \
+as few bytes as possible, which means they must be instances of the smallest \
+integers possible without breaking functionality.
+However, neither Python nor Javascript have multiple classes of ints based on \
+the number of bytes usable.
+Javascript has only one class, \textit{number} that is used to represent both \
+integers and floats.
+Internally, it is stored as a 64-bit float represented in format IEEE-754, with \
+52 bits reserved for mantissa, 11 for exponent and 1 for sign.
+Additionally, JavaScript also support \textit{BigInts} which do not have an \
+upper limit.
+Python, on the other hand, has only one type for integers: \textit{int}.
+Internally, each int is represented using C structures, not the C types for \
+integers, meaning Python doesn't have an upper or lower limit for integers.
+However, both languages contain APIs to write ints of different types and \
+sizes to buffers.
+
+In NodeJS, the \textit{Buffer} class has methods to write ints of different \
+types and sizes to a buffer (for instance, \textit{Buffer.prototype.writeUInt32LE}, \
+which takes as arguments the number to be written and the offset at which to \
+write it).
+In Python, the \textit{struct} module is used.
+The \textit{struct.unpack} is used to read data types from a binary buffer.
+It takes as arguments a string in which the types of data are specified, \
+as shown in figures ~\ref{fig:udp-packer-python-structs} and \
+~\ref{fig:udp-packer-python-endiannes}.
+Following this format, 4-byte integers can be read as following: \
+\begin{verbatim}
+unsigned_short = struct.unpack('<H', buffer[0:2])[0]
+\end{verbatim}
+
+\begin{figure}[ht]
+    \label{fig:udp-packer-python-structs}
+    %\centering
+    \includegraphics[keepaspectratio]{img/python-structs.png}
+    \caption{Python Struct Encodings\footnote{https://docs.python.org/3/library/struct.html}}
+\end{figure}
+
+\begin{figure}[ht]
+    \label{fig:udp-packer-python-endiannes}
+    %\centering
+    \includegraphics[keepaspectratio]{img/python-endiannes.png}
+    \caption{Python Struct Endiannes\footnote{https://docs.python.org/3/library/struct.html}}
+\end{figure}
+
+Having decided how to write the headers, I needed to decide on the actual \
+size in which the header's number would be written.
+I decided that all header numbers would be transmitted as integers to maximize \
+the numbers that can be written.
+The first header information was the image size.
+During tests I noticed that most images being transmitted had around 60kb, with \
+only a few reaching 63 KB.
+I decided that 2 bytes weren't enough to transmit this information (the maximum \
+unsigned number that can be represented on 2 bytes is $2^{16} - 1 = 65535$, which \
+is pretty close to 64512, the size of a 63 KB image), as it wouldn't allow \
+increases in image size.
+So I decided that image size should be represented on 4 bytes.
+The number of pages was the next variable.
+Considering an image of 60 KB, this can be split into 154 packets, well below \
+the maximum unsigned number that can be represented on 1 byte (255), which would \
+be used for images sizing 99 KB.
+So I decided to represent the number of pages using an unsigned 1-byte number.
+The timestamp, however, represented an issue.
+The current timestamp is $1\_592\_655\_360$, which cannot be represented on \
+4 bytes, but it could easily be represented on 6-bytes.
+However, there is no integer type that can be represented on 6-bytes, only on 4 \
+bytes and 8 bytes.
+In order to save an additional two bytes per packet, I decided to split the \
+timestamp into seconds ($1\_592\_655$) and milliseconds ($360$).
+The seconds can be easily represented on 4 bytes, while the seconds can be \
+stored on 2 bytes.
+The final structure of the data packets can be found below, in figure \
+~\ref{fig:udp-packer-packet-composition}.
+
+\begin{figure}[ht]
+    \label{fig:udp-packer-packet-composition}
+    %\centering
+    \includegraphics{img/packet-composition.PNG}
+    \caption{Packet Composition}
+\end{figure}
 
 
 \section{Web Server}
@@ -257,10 +547,14 @@ The Proxy Server runs in a virtual machine on Google Cloud.
 It requires the following ports to be open:
 \begin{itemize}
     \item \textbf{TCP 22} used by the ssh server. Login is done using public-private keys
-    \item \textbf{TCP 8080} used by the HTTP and Websockets server
+    \item \textbf{TCP 443} used by the HTTPS and Websockets server
     \item \textbf{UDP 5000} used by the cloud processor. More details on this in \
             ~\ref{sec:implementation-cloud-processor}
 \end{itemize}
+The proxy itself created embedded HTTP and Websockets server on \
+which it actively listens, but these are not open to the exterior.
+The web server listens on port 443, terminates TLS connections and \
+then routes the un-encrypted traffic to the HTTP and Websockets servers.
 
 The proxy allows all users who are aware of its existence to view the video \
 feed.
@@ -360,7 +654,7 @@ As for deployment, as I mentioned above, the Angular application is compiled \
 into several html, css and javascript files.
 I deployed these files on the same virtual machine on which the proxy server \
 and the cloud processor.
-They are served by an nginx web server.
+They are served by the nginx web server mentioned above.
 
 
 \section{Cloud Image Processor}
@@ -497,9 +791,24 @@ After several tests, I discovered that the best option, \
 considering both resources and price, was an ubuntu virtual \
 machine with 2 cores, 11GB RAM and an NVIDIA Tesla T4 GPU \
 running on premium network.
+Although there are 5 components that are going to run on the \
+virtual machine (OS, udp listener, image processor, proxy server, \
+nginx), the OS uses minimal resources, the image processor \
+uses GPU, which leaves nginx, proxy server and udp listener \
+to request significant CPU.
+Considering that the images themselves won't come continuously, \
+the 3 remaining components should be able to share 2 CPU cores.
+
 As for the virtual machine security, I had to open port 22 \
-for the SSH client, port 443 for the HTTPS connectins, and \
+for the SSH client, port 443 for the HTTPS connections, and \
 port 5000 for the udp server.
+However, port 22 was only used during production, more \
+more specifically to upload source files via SCP and start \
+each component.
+If the server entered production stage, then the cloud \
+components should be configured to start on boot as services, \
+and port 22 could be closed to the exterior, further \
+securing the virtual machine.
 Once all cloud components were implemented and deployed, \
 I took a snapshot of the machine's disk, thus allowing \
 me to easily create new virtual machines from that \

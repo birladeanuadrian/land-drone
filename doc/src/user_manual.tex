@@ -19,13 +19,37 @@ There are multiple ways to build a robot from a hardware perspective, \
 so I will focus on the software.
 The robot application requires the following to be installed:
 \begin{itemize}
-    \item python 3 (latest version)
+    \item python 3.8 (latest version)
     \item nodejs (version 14 or later)
     \item a rabbitmq server (with optional management interface)
     \item a no-ip dns client and a name for remote access
 \end{itemize}
 Once all dependencies have been installed, the components should be started \
 manually from an ssh client.
+The no-ip free dns rezervation is only available for 30 days, after which \
+it should be renewed from their web application.
+Once the DNS client is running on the robot, you should open port 22 for \
+the DNS from the no-ip web interface.
+
+The rabbitmq server should start automaticlly on boot.
+If it did not start, it can started by running the command \
+$sudo service rabbitmq-server start$.
+You can check if rabbitmq is running by opening a browser and navigating \
+to $http://<your-robot-dns>:15672$ or by running the command
+$rabbitmqctl status$ on the robot.
+
+To run the engine control on the drone, you must first install its dependencies.
+This can be done by running the command $pip3 install -r requirements.txt$ on \
+the robot in the folder which contains the python source files.
+After that it can be run by running the command $python3 main.py$.
+
+As for the outer comms, after deploying the source files you must also \
+install the dependencies by running $npm install$ in the folder where you \
+deployed the files.
+Then you must compile the typescript files into javascript by running \
+$npm run compile$.
+Finally you can run it with the command $node dist/producer1.js$.
+
 
 \subsection{Cloud}
 \label{subsec:user-manual-cloud}
@@ -43,6 +67,13 @@ There are 2 ways to configure a virtual machine:
 \end{enumerate}
 Once the virtual machine has been fully configured, one needs to ssh into \
 it and manually start the components.
+The cloud proxy can be started with the command $npm start$, while the \
+cloud image processor can be started with the command $python3 main.py$.
+All warnings about \textit{NUMA} should be ignored.
+
+If you installed the virtual machine manually, then you must also \
+install dependencies and compile typescript for the proxy and image \
+processor, similarly to how it was done on the robot.
 
 \subsection{Browser}
 \label{subsec:user-manual-browser}
@@ -66,8 +97,23 @@ In order to change acceleration, one should press one the \textit{-} or \
 As for direction, it can be changed by clicking on one of the two arrows.
 To start a recording, click on the button \textit{Start recording}, and to \
 stop it press on the button \textit{Stop Recording}.
-THe stop recording button will immediately start a browser download of the \
+The stop recording button will immediately start a browser download of the \
 video.
 
 In order to detect people, click on the button \textit{Detect People}, \
 and to stop detection click on the button \textit{Stop detection}.
+
+\section{Known Issues}
+\label{sec:manual-known-issues}
+\begin{itemize}
+    \item if the FPS rate set in the robot iss too great, the image might \
+        freeze; you should restart the robot's outer comms with a lower \
+        FPS rate
+    \item browser doesn't auto-login controller; if you logged in \
+        to control robot and then refresh the tab, you should login \
+        again
+    \item when the proxy server exits, all components lose their login \
+        session (cloud image processor and web app); to recover login sessions, \
+        the user in the web app should login again and the cloud image \
+        processor should be restarted
+\end{itemize}
