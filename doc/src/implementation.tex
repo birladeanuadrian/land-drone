@@ -28,7 +28,7 @@ in figure ~\ref{fig:deployment-diagram}
 \begin{figure}[ht]
     \label{fig:deployment-diagram}
     \centering
-    \includegraphics[keepaspectratio]{img/deployment4.PNG}
+    \includegraphics[keepaspectratio]{img/deployment_b4.PNG}
     \caption{Deployment Diagram}
 \end{figure}
 
@@ -93,7 +93,7 @@ In order to meet the recommended power requirements for the motors I needed \
 \subsection{Software}
 \label{subsec:implementation-robot-software}
 
-From a software point of view, it consists of 2 independent modules communicating \
+From a software point of view, the robot consists of 2 independent modules communicating \
 with one another via RabbitMQ queues.
 The modules are engine control and external comms.
 The engine control module is implemented in python and controls the 4 wheels \
@@ -101,12 +101,12 @@ independently and can make the robot go forward, reverse and steer.
 The motors themselves are controlled using the pip module \
 \textbf{adafruit\-circuitpython\-motorkit}, which is written by the company \
 that produced the motor shield.
-Using the module, each motors is assigned a positive throttle to move forward \
+Using the module, each motor is assigned a positive throttle to move forward \
 and a negative throttle to go in reverse.
 However, after assembling the robot, I noticed that I mounted some motors in \
 reverse.
 In order to fix this issue, when assigning a throttle to a motor, I multiply \
-that throttle by an int representing the forward direction (1 or -1, \
+that throttle by an integer representing the forward direction (1 or -1, \
 depending on the direction the motor was mounted).
 \begin{verbatim}
 class Motor:
@@ -125,13 +125,13 @@ controlling a wheel) and Engine, that controls all motors.
 The Motor class is an adapter for the Afadruit DCMotor class, and contains \
 the forward direction (1/-1) and a method to set speed.
 The Engine class has the four motors as properties and public methods to \
-fo forward, backward and steer.
+move forward, backward and steer.
 Since the motor location is important, each motor has its own instance variable.
 The class also contains a list with all motors, useful for setting the same \
 throttle to all motors.
 When going straight forward, backward or stopping, the same throttle is set on \
 all motors.
-The left/right direction is controlled by a float variable that can take values \
+The left/right direction is controlled by a floating point variable that can take values \
 between 1 and -1.
 Positive values represent a right direction (with 1 being max \
 right), while negative values represent a left direction (with -1 \
@@ -209,7 +209,7 @@ could no longer ssh into the robot, and had to find a new way to monitor \
 components and upload files.
 The solution I found was to assign the robot a DNS for dynamic IP from noip.com .
 This allowed me to open specific ports from the robot to the internet (mainly \
-22 for SSH and 15672 for RabbitMQ UI), so that I could access them from another \
+22 for SSH and 15672 for RabbitMQ Management UI), so that I could access them from another \
 network (my home network).
 Even though the performance was far from ideal (for free tier), it was enough \
 in order to start/stop processes on the robot, view logs and inspect/publish rabbit \
@@ -248,13 +248,13 @@ I decided that a good option for the global identifier \
 would be the timestamp at which the image was taken, \
 expressed in milliseconds.
 As for the local identifier, I chose it to be an \
-increasing index for each packet.
+increasing index for each packet inside the image buffer.
 Additionally, in order to reconstruct the original buffer, \
 we would have to know the total number of packets from \
 that buffer.
 However, it only needs to be sent once, not with every \
 packet, so I decided it should be sent only with the \
-first packet (named head buffer).
+first packet (named head buffer or header packet).
 To sum up, the original buffer is split into several \
 mini\-buffers (packets) of about 400 bytes size, and each \
 packet has a header with its creation timestamp, \
@@ -380,7 +380,7 @@ it need to read binary data from the buffer and then decode it.
 
 In the \textit{UdpPacker} class, the property \textit{udpMap} is a Javascript \
 Map object (similar to Java HashMap), which is faster than the commonly-used \
-object for retrieving key-value data.
+objects for retrieving key-value data.
 The \textit{imageEmitter} property is an instance of the NodeJS-specific \
 \textit{EventEmitter} class (since this is NodeJS-specific, it won't work \
 by default in the browser, though some frontend frameworks have their \
@@ -425,15 +425,15 @@ and 0 for timestamp.
 In order to minimize the number of created udp packets, the headers must take \
 as few bytes as possible, which means they must be instances of the smallest \
 integers possible without breaking functionality.
-However, neither Python nor Javascript have multiple classes of ints based on \
-the number of bytes usable.
+However, neither Python nor Javascript have multiple classes of integers based on \
+the number of bytes used.
 Javascript has only one class, \textit{number} that is used to represent both \
 integers and floats.
 Internally, it is stored as a 64-bit float represented in format IEEE-754, with \
 52 bits reserved for mantissa, 11 for exponent and 1 for sign.
-Additionally, JavaScript also support \textit{BigInts} which do not have an \
+Additionally, JavaScript also supports \textit{BigInts} which do not have an \
 upper limit.
-Python, on the other hand, has only one type for integers: \textit{int}.
+Python, on the other hand, has a type for integers: \textit{int}.
 Internally, each int is represented using C structures, not the C types for \
 integers, meaning Python doesn't have an upper or lower limit for integers.
 However, both languages contain APIs to write ints of different types and \
@@ -445,27 +445,11 @@ which takes as arguments the number to be written and the offset at which to \
 write it).
 In Python, the \textit{struct} module is used.
 The \textit{struct.unpack} is used to read data types from a binary buffer.
-It takes as arguments a string in which the types of data are specified, \
-as shown in figures ~\ref{fig:udp-packer-python-structs} and \
-~\ref{fig:udp-packer-python-endiannes}.
-Following this format, 4-byte integers can be read as following: \
+It takes as arguments a string in which the types of data are specified.
+Following this format, 4-byte integers can be read as following:
 \begin{verbatim}
 unsigned_short = struct.unpack('<H', buffer[0:2])[0]
 \end{verbatim}
-
-\begin{figure}[ht]
-    \label{fig:udp-packer-python-structs}
-    %\centering
-    \includegraphics[keepaspectratio]{img/python-structs.png}
-    \caption{Python Struct Encodings\footnote{https://docs.python.org/3/library/struct.html}}
-\end{figure}
-
-\begin{figure}[ht]
-    \label{fig:udp-packer-python-endiannes}
-    %\centering
-    \includegraphics[keepaspectratio]{img/python-endiannes.png}
-    \caption{Python Struct Endiannes\footnote{https://docs.python.org/3/library/struct.html}}
-\end{figure}
 
 Having decided how to write the headers, I needed to decide on the actual \
 size in which the header's number would be written.
@@ -516,8 +500,8 @@ js, css), which are available on the \textit{/static/} location.
 The reverse proxy uses a self\-signed certificate.
 
 When it came to choosing a reverse proxy to deploy, I had two choices: \
-Apache and nginx.
-Although there are web servers exist, these two are the most popular \
+Apache and NGINX.
+Although other web servers exist, these two are the most popular \
 on the internet right now.
 According to \
 \footnote{https://www.hostingadvice.com/how\-to/nginx\-vs\-apache/} \
@@ -537,7 +521,7 @@ Similar to the robot outer comms component, it consists mainly \
 of reactions to events.
 These events are either http requests or websockets events.
 And just like the outer comms, the best language to develop the proxy server \
-is NodeJS.
+is TypeScript/NodeJS.
 Since this component only redirects messages to other clients, it contains \
 no classes, just server declarations and message handling, probably being \
 the simplest component.
@@ -660,7 +644,9 @@ They are served by the nginx web server mentioned above.
 \section{Cloud Image Processor}
 \label{sec:implementation-cloud-processor}
 The cloud processor is the most complex component in the project.
-The overall logic can be seen in diagram ~\ref{fig:cloud-processor-activity-diagram}.
+The overall logic can be seen in diagram ~\ref{fig:cloud-processor-activity-diagram}, \
+while in figure ~\ref{fig:cloud-processor-uml-class-diagram} the UML class diagram can be seen.
+
 
 \begin{figure}[ht]
     \label{fig:cloud-processor-activity-diagram}
@@ -669,9 +655,16 @@ The overall logic can be seen in diagram ~\ref{fig:cloud-processor-activity-diag
     \caption{Cloud Processor Activity Diagram}
 \end{figure}
 
-As can be easily from the diagram, the cloud processor is composed of \
+\begin{figure}[ht]
+    \label{fig:cloud-processor-uml-class-diagram}
+    %\centering
+    \includegraphics[keepaspectratio]{img/cloud_image_processor_uml.PNG}
+    \caption{Cloud Processor UML Class Diagram}
+\end{figure}
+
+As can be easily seen from the diagram, the cloud processor is composed of \
 two different mini-components: one component that listens for images \
-sent by the drone on a udp server, and one mini-component that \
+sent by the drone on an udp server, and one mini-component that \
 processes each image and forwards it to the proxy server.
 I considered splitting the cloud processor into 2 distinct components, \
 but in the end I decided to have the two mini-components form a single \
@@ -719,7 +712,7 @@ be the component that will be started in a different process (the \
 \textit{UDPServer} class will extend the Python \
 \textit{multiprocessing.Process} class) and will receive in constructor \
 the multiprocessing queue in which it will write unpacked images.
-Min-component memory footprint is important because Python doesn't \
+The mini-component memory footprint is important because Python doesn't \
 implement the copy-on-write mechanism that is implemented by other \
 languages when it comes to creating new processes.
 Instead, Python pickles (serializes) all affected data and sends it \
@@ -739,6 +732,8 @@ can easily be deleted.
 Because some images might be randomly deleted, the final \
 FPS rate can be lower than the FPS rate set by the robot, \
 without any way to determine how much it can differ.
+The \textit{UdpUnpacker} and \textit{UdpPacket} classes \
+correspond to the classes defined in diagram ~\ref{fig:udp-packer-class-uml}.
 
 \subsection{Image Processor}
 \label{subsec:implementation-image-processor}
@@ -763,7 +758,7 @@ size 600x600 from each image and only transmit that rectangle. % todo: this
 During implementation I also found that tensorflow-gpu uses \
 lazy-loading for GPU(more specifically, NVIDIA) libraries.
 Because of this, when the object detection algorithm is applied \
-for the first time on am image, it may take several from seconds \
+for the first time on an image, it may take several from seconds \
 to several dozens seconds for the GPU to initialize.
 In order to prevent images pilling up in the memory queue while \
 the GPU is being initialized, in the image processor constructor, \
@@ -771,20 +766,20 @@ before the udp server is started, I process a default image (an \
 image of a Husky) so that the GPU can be safely initialized, and \
 when the first image arrives, it can be processed right away.
 
-
 % todo: write other stuff
  The image processor also contains an embedded web server through \
 which it can receive commands to start video recording, stop video \
 recording, run image processing on frames or stop image processing \
 on frames.
+The \textit{DetectorApi} class acts as an adapter to tensorflow.
 
 \section{Cloud Deployment}
 \label{sec:implementation-cloud-deployment}
 As I mentioned before, I deployed the cloud component on the \
 Google Cloud Platform infrastructure, where I was able to use \
-their trial offer (giving me a specific sum that I could \
+their trial offer (giving me a specific sum that I could use \
 to deploy anything for 12 months).
-I needed an linux virtual machine (Windows uses considerably \
+I needed a linux virtual machine (Windows uses considerably \
 more resources than linux distributions) with at least 2 cores, \
 enough RAM for tensorflow and a GPU.
 After several tests, I discovered that the best option, \
@@ -802,8 +797,8 @@ the 3 remaining components should be able to share 2 CPU cores.
 As for the virtual machine security, I had to open port 22 \
 for the SSH client, port 443 for the HTTPS connections, and \
 port 5000 for the udp server.
-However, port 22 was only used during production, more \
-more specifically to upload source files via SCP and start \
+However, port 22 was only used during development, more \
+specifically to upload source files via SCP and start \
 each component.
 If the server entered production stage, then the cloud \
 components should be configured to start on boot as services, \

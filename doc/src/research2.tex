@@ -6,12 +6,12 @@
 
 \section{Remote Drone Control}
 \label{sec:research-remote-drone-control}
-The article ~\cite{ericsson1} also approaches the topic of drone control. \
+The article ~\cite{ericsson1} also approaches the topic of drone control.
 According ot it, most current drone use cases cover the situation in which the drone \
 operator is in line of sight of the drone and has full control over it, with autonomous \
-drones operating outside line of sight gaining more and more importance today. \
+drones operating outside line of sight gaining more and more importance today.
 However, in the future the most common drone use cases will be the ones in which the drone \
-operates autonomously outside line of sight ir without supervision.
+operates autonomously outside line of sight without supervision.
 
 \begin{figure}[ht]
     \label{fig:drone-uses}
@@ -23,7 +23,7 @@ operates autonomously outside line of sight ir without supervision.
 In ~\cite{ericsson1} the author mentions three different options for drone communication and control:
 \begin{enumerate}
     \item \textbf{satellite technology} is currently in use today for some drones; \
-            its drawbacks include high latency and costs and low throughput
+            its drawbacks include high latency, costs and low throughput
     \item \textbf{dedicated drone terrestrial network} its drawbacks also include high \
             costs and the time it would take to setup an adequate coverage for drones
     \item \textbf{existing terrestrial mobile networks} they have low latency and costs and \
@@ -31,21 +31,21 @@ In ~\cite{ericsson1} the author mentions three different options for drone commu
             additionally, they have also proven to be secure and robust
 \end{enumerate}
 
-Additionally, other requirements can be accomplished using 4G LTE and 5G features. \
+Additionally, other requirements can be accomplished using 4G LTE and 5G features.
 For instance, drone tracking can be implemented using the mobile positioning service and \
 could be queried from the mobile network.
 
-Drone control is also mentioned in ~\cite{forbes1} . \
+Drone control is also mentioned in ~\cite{forbes1} .
 The article also mentions 2 possible control methods that are actively used and that \
 partially overlap over those mentioned above. \
 These are:
 \begin{enumerate}
     \item \textbf{radio waves} these have limited range (an example of 100 miles is given);
     \item \textbf{satellite uplink} it takes footage an average 1.2-second delay to go from \
-            a drone in Afghanistan to the operator in Virginia
+            a drone in Afghanistan to an operator in Virginia
 \end{enumerate}
 
-~\cite{forbes1} also does a classification of drones according to how they are commanded. \
+~\cite{forbes1} also does a classification of drones according to how they are commanded.
 Three classes of drones emerge:
 \begin{enumerate}
     \item \textbf{remotely piloted} an operator has full control, while the drone can do \
@@ -61,23 +61,126 @@ Three classes of drones emerge:
 \section{Object Detection}
 \label{sec:research-object-detection}
 In recent years, convolutional neural networks have been used more and more in \
-the field of object detection. \
+the field of object detection.
 According to ~\cite{deepLearning}, A convolutional neural network (CNN) is a \
 subclass of multilayer neural networks in which at least one layer applies \
 a convolution on its input data instead of matrix multiplication.\
 CNNs have seen a rise in use in object detection since 2012, when \
 a CNN developed by ~\cite{imagenet} won the ImageNet Large Scale Visual \
-Recognition Challenge for the first time. \
+Recognition Challenge for the first time.
 The CNN managed to reduce the top-1 (actual label differs from predicted label) \
  and top-5 (actual label is not in the predicted top 5 most likely labels) \
-error rates from 47.1\% respectively 28.2\% to 37.5\% respectively 17\%. \
+error rates from 47.1\% respectively 28.2\% to 37.5\% respectively 17\%.
 Additionally, the authors mentioned that the performance was limited by the \
 existing hardware and dataset
-Ever since, the contest has been won by convolutional neural networks. \
+Ever since, the contest has been won by convolutional neural networks.
 By 2016, the top-5 error rate dropped to 3.6\%.
+Next I will present some popular object detection neural networks.
 
 % todo: mention SSD vs YOLO
+\subsection{YOLOv1}
+\label{subsec:research-yolov1-detectors}
+The YOLO (You Only Look Once) ~\cite{yolov1} neural network appeared as an alternative \
+to other neural networks that required a classifier to be run at differently \
+spaced locations across the image.
+The YOLO network is a single convolutional neural network that predicts  multiple \
+bounding boxes and class probabilities for each box simultaneously.
+This approach entails multiple benefits, including increased speed (the network \
+doesn't have a complex pipeline) and less background errors ( network takes into \
+account the entire image when predicting, not just a single windows, \
+leading to less background errors).
+However, the accuracy is lesser than for other state-of-the-art networks.
+The YOLO network has issues localizing exactly small objects.
 
+The network works by first resizing the image to 448 x 448 dimension, then by dividing \
+the image into grid cells of size \textit{S} x \
+\textit{S}, with \textit{S} being a network parameter.
+If such a grid cell contains the center of an object, then that \
+grid cell is in charge of detecting that object.
+Each cell predicts \textit{B} boxes and confidence scores for each box.
+Additionally, each box also has \textit{C} conditional class probabilities, \
+each stating the probability that the detected object is a member of class \
+\textit{i}.
+The authors created a variant of the original network that had less layers \
+(and thus less accuracy), but a higher speed, named \textit{Fast YOLO}.
+
+
+\subsection{Single Shot MultiBox Detector}
+\label{subsec:research-ssd}
+Another image detection network is the Single Shot MultiBox Detector \
+~\cite{ssd1}.
+The network first extracts a feature layer.
+By applying a 3 x 3 convolution on that feature layer multiple \textit{k} \
+bounding boxes are obtained.
+Finally, for each bounding box \textit{c} class scores are computed (with \
+\textit{c} being the number of objects the network was trained for) and \
+4 relative offsets to the original bounding box shape.
+
+Tests run on the Pascal VOC2007 challenge showed that the SSD network was \
+both faster and more accurate than the YOLO network.
+The results comparisons, considering resolutions, precision (expressed in mAP - mean \
+average precision), and FPS can be seen in table ~\ref{tab:ssd-results}.
+
+\begin{table}[ht]
+    \caption{Pascal VOC2007 results}
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline\hline
+        Method & mAP \footnote{mean Average Precision} & FPS & \# Boxes & Input resolution  \\
+        \hline
+        Faster R-CNN & 7.32 & 7 & \~ 6000 & ~1000 x 600 \\
+        Fast YOLO & 52.7 & 155 & 98 & 448 x 448 \\
+        YOLO & 66.4 & 21 & 98 & 448 x 448 \\
+        SSD300 & 74.3 & 46 & 8732 & 300 x 300 \\
+        SSD512 & 76.8 & 19 & 24564 & 512 x 512 \\
+        \hline\hline
+    \end{tabular}
+    \label{tab:ssd-results}
+\end{table}
+
+%\subsection{YOLOv2}
+%\label{subsec:yolov2}
+%YOLO v2 (also known as YOLO9000 - since it can detect over 9000 objects classes) \
+%is a modification of the initial YOLO algorithm.
+%According to the authors, at 67 FPS
+%
+
+
+
+\section{Object Tracking}
+\label{sec:research-tracking}
+Some projects use object detection algorithms to detect an initial object, and \
+then start applying tracking algorithsm and stop applying detection algorithsm \
+because tracking algorithms are faster than the detection algorithms.
+
+In ~\cite{OpencvTracking}, the author present a status of the most \
+popular tracking algorithms from opencv.
+After analysing multiple algorithms (CSRT, KCF, Boosting, MIL, TLD, \
+MedianFlow, MOSSE, GOTURN), the author comes to the following \
+conclusions:
+\begin{itemize}
+    \item \textbf{CSRT (Channel and Spatial Reliability Tracker)}  should be used when higher tracking accuracy \
+            is required and the program can tolerate a smaller throughput
+    \item \textbf{KCF (kernel correlation filter)} should be used when the program requires greater \
+            throughput and faster FPS at the expense of a slightly \
+            lower accuracy
+    \item \textbf{MOSSE (Minimum Output Sum of Squared Error)} should be used when the speed is of absolute \
+            importance
+\end{itemize}
+
+In ~\cite{OpencvTracking2} the author also compares the different \
+tracking algorithms, adding the FPS for each algorithm.
+The KCF tracker reached 409 FPS, but it failed to recover from full \
+object occlusion.
+The MOSSE tracker reached an astounding 2671 FPS, but it lacked \
+behind deep learning based trackers in performance.
+Even more, the author mentions that the algorithm looses precision \
+even for objects in normal movement.
+As for CSRT, it gives higher accuracy, but it reached only 32 FPS.
+
+
+\section{Related Work}
+\label{sec:related-word}
 
 In the paper~\cite{deepDrone}, the authors also attempt to create a drone capable \
 of detecting people, with a few differences:
@@ -87,12 +190,12 @@ of detecting people, with a few differences:
 \end{itemize}
 
 The authors designed an algorithm to detect and track a single person at a time.
-They used a Faster RCNN neural network to detect a person.
+They used a Faster RCNN (region based convolutional neural network) to detect a person.
 Once the drone detected an object, it stopped applying the neural network on \
 new images.
-Instead, it applied a KCF tracking algorithm as longs as the object was still in \
-the image.
-Once the KCF algorithm detected that he object was no longer in the image, \
+Instead, it applied a KCF (kernel correlation filter) tracking algorithm as longs \
+as the object was still in the image.
+Once the KCF algorithm detected that the object was no longer in the image, \
 the drone stopped applying the tracking algorithm and switched back to the \
 detection neural network.
 The authors also experimented with a YOLO detector, but they found that although it is \
@@ -121,36 +224,78 @@ Since the image processing is done on the drone itself, the power consumption of
 the CPU and GPU must also be taken into consideration in order to determine the \
 autonomy of the drone.
 
-\section{Object Tracking}
-\label{sec:research-tracking}
-Some projects use object detection algorithms to detect an initial object, and \
-then start applying tracking algorithsm and stop applying detection algorithsm \
-because tracking algorithms are faster than the detection algorithms.
+In ~\cite{drone3}, the authors consider different possible implementations \
+for an object detection algorithm that could be used by UAVs.
+They consider an architecture, comprised of 3 parts:
+\begin{enumerate}
+    \item \textbf{UAV} and associated sensors
+    \item \textbf{Cloud computing} VMs/Pods with GPU servers that could do \
+            intensive operations
+    \item \textbf{Fog Node} - a laptop/smartphone that acts as an \
+            intermediary between drone and cloud computing
+\end{enumerate}
 
-In ~\cite{OpencvTracking}, the author present a status of the most \
-popular tracking algorithms from opencv.
-After analysing multiple algorithms (CSRT, KCF, Boosting, MIL, TLD, \
-MedianFlow, MOSSE, GOTURN), the author comes to the following \
-conclusions:
-\begin{itemize}
-    \item \textbf{CSRT} should be used when higher tracking accuracy \
-            is required and the program can tolerate a smaller throughput
-    \item \textbf{KCF} should be used when the program requires greater \
-            throughput and faster FPS at the expense of a slightly \
-            lower accuracy
-    \item \textbf{MOSSE} should be used when the speed is of absolute \
-            importance
-\end{itemize}
+As for object detection algorithms, the authors consider two different \
+types of networks: two-stage and one-stage.
+In the two-stage networks, in the first stage a few regions of interest \
+are selected, with most of the background being filtered out.
+In the second stage, classification is performed for every region \
+of interest.
+The authors consider R-CNN, Fast-RCNN and Faster R-CNN as possible \
+solutions for two-stage networks.
+As for one-stage networks, they consider SSD and YOLO.
+Although one-stage networks are faster, the authors mention that they \
+can cause a larger number of false negatives, which could affect \
+the training phase.
+In order to fix this issue, the authors decided to use \
+Focal loss ~\cite{focalLoss}.
 
-In ~\cite{OpencvTracking2} the author also compares the different \
-tracking algorithms, adding the FPS for each algorithm.
-The KCF tracker reached 409 FPS, but it failed to recover from full \
-object occlusion.
-The MOSSE tracker reached an astounding 2671 FPS, but it lacked \
-behind deep learning based trackers in performance.
-Even more, the author mentions that the algorithm looses precision \
-even for objects in normal movement.
-As for CSRT, it gives higher accuracy, but it reached only 32 FPS.
+Another paper in which the authors attempt to build an aerial \
+remote-controlled drone is ~\cite{drone4}.
+Here, the authors experiment with several computing platforms \
+and system architectures, as follows:
+
+\begin{enumerate}
+    \item \textbf{on-board embedded GPU system} the drone contains \
+        a micro-processor with a high\-performance embedded GPU;
+        three micro-processors were tested: Nvidia Jetson TX1,\
+        Nvidia Jetson TX2 and Nvidia Xaver;
+        the final image is streamed to a computer connected with a \
+        Wi-Fi network
+    \item \textbf{off-board GPU based station} the drone transmits \
+        the raw image to a ground station equipped with a GPU, where \
+        image processing occurs;
+        the ground base was equipped with a GTX 1080 GPU, while the \
+        drone was equipped with either a Latte Panda or an Odroid \
+        microprocessor
+    \item \textbf{on-board GPU-constrained system} the drone is \
+        controlled by a microprocessor without a high\-performance \
+        embedded GPU, but with a neural compute stick plugged in;
+        the tested microprocessors were Raspberry Pi, Latte Panda \
+        and Odroid
+\end{enumerate}
+
+As for the object detection algorithms, the authors experimented with \
+a wide variety, including YOLO v2 \& v3, SSD, SSD MobileNet.
+The best results were obtained on Xavier AGX microprocessor and on \
+the GPU ground base station, as presented in the table \
+~\ref{tab:drone4-results}
+
+\begin{table}[ht]
+    \caption{Results for neural networks and platforms}
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline\hline
+        Neural Network & TX1 & TX2 & Xavier AGX & GTX 1080  \\
+        \hline
+        YOLO v2 & 2.9 FPS & 7 FPS & 26\-30 FPS & 28 FPS \\
+        YOLO v3 & \-\-\- & 3 FPS & 16\-18 FPS & 15 FPS  \\
+        YOLO v3 tiny & 9\-10 FPS & 12 FPS & 30 FPS & 30\+ FPS \\
+        SSD & 8 FPS & 11\-12 FPS & 35\-48 FPS & 32 FPS \\
+        \hline
+    \end{tabular}
+    \label{tab:drone4-results}
+\end{table}
 
 
 %Bibliographic research has as an objective the establishment of the references for the \

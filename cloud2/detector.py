@@ -73,7 +73,7 @@ class DetectorAPI:
                              int(boxes[0, i, 2] * im_height),
                              int(boxes[0, i, 3]*im_width))
 
-        return boxes_list, scores[0].tolist(), [int(x) for x in classes[0].tolist()], int(num[0])
+        return boxes_list, scores[0].tolist(), [int(x) for x in classes[0].tolist()]
 
     def close(self):
         self.sess.close()
@@ -120,14 +120,14 @@ class ImageProcessor:
                 jpeg_buffer = self.process_image(jpeg_buffer)
                 now2 = int(time.time() * 1000)
                 delta_proc = now2 - now
-            self.image_transmitter.transmit_image(jpeg_buffer, ts_drone_send, delta_rec, delta_proc)
+            self.image_transmitter.transmit_image(jpeg_buffer, ts_drone_send)
 
 
     def process_image(self, jpeg_buffer):
         d2 = frombuffer(jpeg_buffer, dtype=uint8)
         img = cv2.imdecode(d2, cv2.IMREAD_COLOR)
 
-        boxes, scores, classes, num = self.odapi.process_frame(img)
+        boxes, scores, classes = self.odapi.process_frame(img)
         # drawing_boxes = []
         human_boxes = []
 

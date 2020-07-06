@@ -1,6 +1,7 @@
 import SocketIO from 'socket.io';
 import express from 'express';
 import cors from 'cors';
+import * as http from 'http';
 
 
 const controllerSecret = 'secret1';
@@ -55,6 +56,35 @@ ioServer.on('connection', (socket: SocketIO.Socket) => {
                 console.log('Control message', msg);
                 ioServer.emit('drone-control', msg);
             });
+
+            socket.on('start-rec', () => {
+                console.log('start recording');
+                http.get('http://localhost:3000/start-record', res => {
+                    console.log('Response', res.statusCode, res.read());
+                });
+            });
+
+            socket.on('stop-rec', () => {
+                console.log('stop recording');
+                http.get('http://localhost:3000/stop-record', res => {
+                    console.log('Response', res.statusCode, res.read());
+                })
+            });
+
+            socket.on('start-track', () => {
+                console.log('start track');
+                http.get('http://localhost:3000/start-tracking', res => {
+                    console.log('Response', res.statusCode, res.read());
+                });
+            });
+
+            socket.on('stop-track', () => {
+                console.log('stop track');
+                http.get('http://localhost:3000/stop-tracking', res => {
+                    console.log('Response', res.statusCode, res.read());
+                })
+            });
+
         } else if (secret === cloudProcessorSecret) {
             console.log('Cloud processor logged in');
 

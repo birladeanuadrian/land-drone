@@ -70,4 +70,20 @@ export class CloudSocketService {
     const message = {acceleration, direction, now};
     this.socket.emit('control-message', JSON.stringify(message));
   }
+
+  startTracking() {
+    this.socket.emit('start-track');
+  }
+
+  stopTracking() {
+    this.socket.emit('stop-track');
+  }
+
+  startRec() {
+    this.socket.emit('start-rec');
+  }
+
+  stopRec() {
+    this.socket.emit('stop-rec');
+  }
 }

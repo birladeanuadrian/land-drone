@@ -48,12 +48,12 @@ some communication overhead.
 However, this introduces a new issue related to image processing.
 If the image processing is done on the robot, then the robot will most likely require \
 a GPU in order to speed up the processing and allow real-time video transmission.
-However, this leads to a higher energy consumption and lower autonomy.
-On the other hand, if the image processing is done on the machines on which the controller \
+However, this leads to a higher energy consumption, lower autonomy and increased costs.
+On the other hand, if the image processing is done on the machine on which the controller \
 runs, then that machine will require a powerful GPU, which contradicts our usability \
-requirements, which states that the users controlling the robot should be albe to use any \
-larger screen, no matter the hardware.
-Additionally, the robot should be aware of all controllers so that it known where \
+requirements, which states that the users controlling the robot should be able to use any \
+screen, no matter the hardware (to a certain degree).
+Additionally, the robot should be aware of all controllers so that it knows where \
 to transmit the images, which introduces more coupling between the robot and \
 controller.
 
@@ -92,7 +92,7 @@ a browser client for the following reasons:
             reside on the server and are downloaded every time a user \
             runs the application, I have full control over what \
             version runs on the users' machines and don't have to \
-            rely on them to update their applications or maintain \
+            rely on them to update their applications nor do I have to maintain \
             deprecated APIs in production so that older versions of \
             clients can still run.
     \item \textbf{Versatility} There is a possibility that future \
@@ -102,9 +102,6 @@ a browser client for the following reasons:
             that can turn browser applications \
             into native desktop or native mobile applications.
 \end{enumerate}
-
-
-
 
 \section{Communication Protocols}
 \label{sec:analysis-comms-protocols}
@@ -150,7 +147,7 @@ that it can transmit as an HTTP/S response.
 Then the client closes the existing HTTP/S request and makes a \
 new one.
 The downside of long polling is that both the initial HTTP/S \
-request and the response contains a lot of specific HTTP headers \
+request and the response contain a lot of specific HTTP headers \
 and cookies, most or all of which are useless.
 This introduces a considerable latency, especially when the number \
 of concurrent connection grows.
@@ -159,7 +156,7 @@ Websockets appeared as a way to minimize latency, allowing true \
 bi-directional communication.
 Websockets are initialized with an HTTP request to the server, \
 though there are a few differences.
-The http/s scheme is replaced with an ws/s scheme specific to \
+The http/s scheme is replaced with a ws/s scheme specific to \
 websockets.
 Additionally, the request also contains an \textit{Upgrade} \
 headers with the value \textit{websocket}
@@ -192,7 +189,7 @@ consisting of multiple frames.
 Only after all the frames have been received can the receiver \
 begin to process the data.
 
-Even though frames still require an additional 4\-12 frames \
+Even though messages still require an additional 4\-12 frames \
 of data in order for them to be routed correctly, the \
 overhead is still considerably smaller than the overhead for \
 normal HTTP requests, and the latency is reduced considerably.
@@ -212,7 +209,7 @@ MobileNet works as a feature extractor, with the output of its last layers \
 connected to the input of the SSD network.
 
 In order for deep neural networks to be effective, they need to be trained on \
-large datasets. \
+large datasets.
 Some common such datasets are:
 \begin{itemize}
     \item the Microsoft COCO dataset ~\cite{COCO} (about 300k images, out of \
@@ -222,12 +219,12 @@ Some common such datasets are:
 \end{itemize}
 
 A neural network takes a considerable amount of time to train on such datasets \
-even with state-of-the-art hardware. \
+even with state-of-the-art hardware.
 For this reason, there are a number of pre-trained models available on the \
 internet.
 \footnote{https://github.com/tensorflow/models/blob/master/research/object\_detection/g3doc/detection\_model\_zoo.md} \
 contains a list of pre-trained models that could be used for object detection.
-The most efficient, taking into consideraiton both accuracy and execution \
+The most efficient, taking into consideration both accuracy and execution \
 speed, seems to be \textbf{ssdlite\_mobilenet\_v2\_coco}, which is why I \
 chose to use it the drone.
 
@@ -256,7 +253,7 @@ a camera and a 4G adapter, as shown in figure ~\ref{fig:robot-scheme}.
 \begin{figure}[ht]
     \label{fig:robot-scheme}
     %\centering
-    \includegraphics[keepaspectratio]{img/land-drone-bb.png}
+    \includegraphics[keepaspectratio]{img/land-drone-bb4.png}
     \caption{Robot Scheme}
 \end{figure}
 
@@ -283,18 +280,18 @@ increasing extendability.
  a server that runs in cloud.
 
  The image needs to go through 2 different paths in order to get from the robot to the \
-user that controls it. \
-The first path is from robot to the cloud server that acts as a proxy. \
+user that controls it.
+The first path is from robot to the cloud server that acts as a proxy.
 Since this communication is initiated by the client, the UDP protocol, which is faster than \
-TCP, can be used. \
+TCP, can be used.
 However, UDP packets have a small upper size limit (~500 bytes), which if surpassed, may cause \
-the packet to be dropped on the way. \
+the packet to be dropped on the way.
 For this reason, each image needs to be split into several smaller packets that can be safely \
-transmitted over UDP. \
+transmitted over UDP.
 Since the protocol does not guarantee the order in which packets arrive at the destination, \
 each one must contain 2 identifiers: one that uniquely identifies each image, and one that \
-uniquely identifies the order of the packet in its image. \
-Using these 2, the image can be safely reconstructed from the UDP packets. \
+uniquely identifies the order of the packet in its image.
+Using these 2, the image can be safely reconstructed from the UDP packets.
 While the second identifier (for packets in an image) can be simply an index, the first \
 identifier (for images) was chosen to be the unix timestamp in milliseconds at which the \
 image was taken.
@@ -305,13 +302,6 @@ As mentioned above, this path should be using TCP sockets.
 The best way to send data in a continuous stream from server to multiple web \
 clients is using web sockets, which are supported by all modern browsers.
 
-\begin{figure}[ht]
-    \label{fig:video-flow}
-    %\centering
-    \includegraphics[width=15cm, height=20cm,keepaspectratio]{img/video-flow.png}
-    \caption{Video Flow}
-\end{figure}
-
 As for the commands sent from the controller ot the drone, there are two possible \
 options: using websockets or using a REST API.
 In this case, the websockets present an advantage caused by the fact that they \
@@ -319,8 +309,8 @@ use an already existing connection, as opposed to using a REST API, which would 
 require a new separate connection for each command to be sent.
 
 \begin{figure}[ht]
-    \label{fig:command-flow}
+    \label{fig:vc-flow}
     %\centering
-    \includegraphics[width=15cm, height=20cm,keepaspectratio]{img/command-flow.png}
-    \caption{Command Flow}
+    \includegraphics[keepaspectratio]{img/vc_flow.png}
+    \caption{Command \& Video Flow}
 \end{figure}

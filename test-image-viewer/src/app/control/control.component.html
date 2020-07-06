@@ -25,5 +25,35 @@
     <td><button (click)="steerLeft()"><-</button></td>
     <td><button (click)="steerRight()">-></button></td>
   </tr>
+  <tr>
+    <td>
+      Tracking
+    </td>
+    <td></td>
+    <td>
+      <button (click)="startTracking()" [disabled]="activeTracking">
+        Start
+      </button>
+    </td>
+    <td>
+      <button (click)="stopTracking()" [disabled]="!activeTracking">
+        Stop
+      </button>
+    </td>
+  </tr>
+  <tr>
+    <td>Recording</td>
+    <td></td>
+    <td>
+      <button (click)="startRecording()" [disabled]="activeRecording">
+        Start
+      </button>
+    </td>
+    <td>
+      <button (click)="stopRecording()" [disabled]="!activeRecording">
+        Stop
+      </button>
+    </td>
+  </tr>
   </tbody>
 </table>

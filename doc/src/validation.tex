@@ -110,7 +110,7 @@ compared it to the video on the laptop I saw that they were \
 synchronized, with a delay of 70ms.
 The problem probably came from the fact that the laptop time was \
 synchronized with windows servers, while the smartphone \
-was sycnhronized with Samsung servers.
+was synchronized with Samsung servers.
 If there was indeed an additional delay on the smartphone, it \
 wasn\'t one that could be observed with the eye.
 
@@ -120,3 +120,20 @@ but when compared to the image on the laptop, it was \
 also synchronized.
 Though the results didn't directly show it, the tests were \
 a success.
+
+\section{Full-TCP Tests}
+\label{sec:tcp-tests}
+I also decided to run a test using full-TCP connections.
+I wrote a small Python module to replace the drone outer comms.
+The module connects directly to the cloud-server and then sends an image every 100ms\
+Bypassing the image processor component and the nginx reverse proxy gives this \
+module a small speed advantage).
+However, the result was that the image was transmitted with a delay of 83 ms at an average \
+rate of 8 FPS, considerably lower than the UDP implementation, which had \
+a 67 ms delay (meaning a 29.85\% decrease in speed) and 10-11 FPS.
+The difference was also observable by eye.
+This confirms my initial decision to use UDP to transmit images from drone to the \
+server.
+However, despite this decrease in speed, the delay is still well below the target of \
+500ms, meaning this option could be used in order to encrypt the video transmission \
+from drone to server.

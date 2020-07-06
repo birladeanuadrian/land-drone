@@ -14,6 +14,10 @@ export class ControlComponent implements OnInit {
 
   password = '';
 
+  activeTracking = false;
+
+  activeRecording = false;
+
   constructor(private cloudSocketService: CloudSocketService) { }
 
   ngOnInit(): void {
@@ -74,6 +78,28 @@ export class ControlComponent implements OnInit {
     this.direction += 10;
     this.sendCommand();
   }
+
+  startTracking() {
+    console.log('Start tracking');
+    this.cloudSocketService.startTracking();
+  }
+
+  stopTracking() {
+    console.log('Stop tracking');
+    this.cloudSocketService.stopTracking();
+  }
+
+  startRecording() {
+    console.log('Start recording');
+    this.cloudSocketService.startRec();
+  }
+
+  stopRecording() {
+    console.log('Stop recording');
+    this.cloudSocketService.stopRec();
+  }
+
+
 
   private sendCommand() {
     this.cloudSocketService.sendCommand(this.acceleration, this.direction);

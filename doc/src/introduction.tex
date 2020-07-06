@@ -8,13 +8,17 @@
 
 \subsection{General Context}
 \label{subsec:introduction-general-context}
+In this project I attempt to design, build and implement a remote-controlled drone using new and \
+trending technologies, among them being high-speed wireless networks, cloud computing and \
+neural networks.
+
 With the increase of internet speed across the globe, possible among others to the appearance of 5G networks and, in
 the near future, to the SpaceX Starlink network, it is now possible to stream increasingly larger data across the
-internet. \
+internet.
 According to \footnote{https://www.speedtest.net/global\-index\#mobile}, \
-the global mobile internet speed was of about 31Mbps for download and 11.88Mbps for upload. \
+the global mobile internet speed was of about 31Mbps for download and 11.88Mbps for upload.
 Although these values are still pretty low, they are bound to improve in the near future.
-The highest values were achieved using 4G LTE and 4G LTE-A networks.
+The highest values were achieved using 4G LTE (long-term evolution) and 4G LTE-A networks.
 
 \begin{table}[ht]
     \caption{Average internet speed}
@@ -39,6 +43,48 @@ The highest values were achieved using 4G LTE and 4G LTE-A networks.
     \label{tab:internetspeed}
 \end{table}
 
+
+\subsection{5G}
+\label{subsec:5g}
+According to Telekom \footnote{https://www.telekom.com/en/company/details/5g\-speed\-is\-data-transmission\-in\-real\-time\-544498} \
+5G internet speeds should reach speeds of about 10Gbps, enough to stream video-audio in real time.
+However, according to Forbes \footnote{https://www.forbes.com/sites/bobodonnell/2019/11/22/real\-world\-5g\-speeds/\#3ec794804f96} \
+and the UK 5G Group \footnote{https://5g.co.uk/guides/how\-fast\-is\-5g}, \
+such speeds cannot be reached with the current infrastructure, with download speeds averaging at about 130Mbps-240Mbps, \
+with peaks at about 600Mbps.
+However, certain variants have reached peaks of 1.8 Gbps (using mmWave 5G services) and even 1Tbps in controlled \
+test environments.
+It must be noted that these are only the early days of 5G networks, and that in the coming years these speeds are \
+bound to improve.
+
+According to
+\footnote{https://web.archive.org/web/20190419231844/http://www.5gamericas.org/files/5115/4169/8314/5G\_Americas\_URLLLC\_White\_Paper\_Final\_11.8.pdf} \
+and \footnote{https://en.wikipedia.org/wiki/5G}
+possible use cases for 5G networks include but are not limited to  Smart Factories (industrial control, robot control),\
+healthcare (remote diagnosis and surgery), entertainment (immersive entertainment, online gaming), transport \
+industry (driver assistance, enhanced safety, autonomous driving, traffic management), energy sector (smart energy, \
+smart grid).
+
+\subsection{Satellite internet}
+\label{subsec:satellite-internet}
+As mentioned in \footnote{https://www.forbes.com/sites/bobodonnell/2019/11/22/real\-world\-5g\-speeds/\#3ec794804f96}, \
+for 5G, the radio wave internet speed is inversely proportional to the distance covered.
+This means that regular 5G high speed internet will probably be limited to regions densely and medium populated and \
+to research outposts because of infrastructure costs.
+A valid alternative for sparsely populated areas would be satellite internet.
+Several US companies have already begun taking steps towards a commercial solution.
+The most notable player is SpaceX with its project, Starlink, a network of several dozen thousands satellites in lower \
+Earth orbit, in the range of 350\-550 km from Earth, as opposed to the average altitude of \
+1000+ km for satellites in lower earth orbit.
+According to \footnote{https://www.pcmag.com/news/spacexs\-satellite\-internet\-plans\-for\-mid\-2020\-launch\-in\-the\-us} , \
+the desired average speed is about 1Gbps. \
+ \footnote{https://spacenews.com/spacex\-launches\-second\-batch\-of\-starlink\-broadband\-satellites/} \
+mentions that tests with the US military achieved peak speeds of around 610 Mbps, while the network isn't fully \
+functional yet, with thousands of satellites still to be sent to space.
+According to the official \href{https://www.starlink.com/}{Starlink} website, the company expects to reach coverage \
+for northern US and Canada by 2020, and for the rest of the world by 2021.
+Other companies, including Amazon and OneWeb, have started work on deploying their own internet satellite network.
+
 \subsection{Cloud Computing}
 \label{subsec:cloud-computing}
 Cloud Computing first appeared in 2007, when Amazon AWS released EC2 (Elastic Compute \
@@ -52,60 +98,31 @@ eliminating the need of on-premise infrastructure engineers (actually replacing 
 with cloud engineer) and making sure that hardware failures do not impact users' \
 businesses.
 Considering this, it might be a good idea to move image processing from an actual \
-drone to the cloud, thus making sure that should any accident happens to the drone, \
+drone to the cloud, thus making sure that should any accident happen to the drone, \
 the losses would be minimal (processing images on drone in real-time would probably \
 require a GPU, which is considerably more expensive than other parts of the robot).
 Additionally, removing the GPU from the drone would remove a significant consumer \
 of power, thus extending the autonomy of the drone.
 
-\subsection{5G}
-\label{subsec:5g}
-According to Telekom \footnote{https://www.telekom.com/en/company/details/5g\-speed\-is\-data-transmission\-in\-real\-time\-544498} \
-5G internet speeds should reach speeds of about 10Gbps, enough to stream video-audio in real time.
-However, according to Forbes \footnote{https://www.forbes.com/sites/bobodonnell/2019/11/22/real\-world\-5g\-speeds/\#3ec794804f96} \
-and the UK 5G Group \footnote{https://5g.co.uk/guides/how\-fast\-is\-5g}, \
-such speeds cannot be reached with the current infrastructure, with download speeds averaging at about 130Mbps-240Mbps, \
-with peaks at about 600Mbps.
-However, certain variants have reached peaks of 1.8 Gbps (using mmWave 5G services) and event 1Tbps in controlled \
-test environments.
-
-It must be noted that these are only the early days of 5G networks, and that in the coming years these speeds are \
-bound to improve.
-
-According to
-\footnote{https://web.archive.org/web/20190419231844/http://www.5gamericas.org/files/5115/4169/8314/5G\_Americas\_URLLLC\_White\_Paper\_Final\_11.8.pdf} \
-and \footnote{https://en.wikipedia.org/wiki/5G}
-possible use cases for 5G networks include but are not limited to  Smart Factories (industrial control, robot control),\
- healthcare (remote diagnosis and surgery), entertainment (immersive entertainment, online gaming), transport \
-industry (driver assistance, enhanced safety, autonomous driving, traffic management), energy sector (smart energy, \
-smart grid).
-
-
-\subsection{Satellite internet}
-\label{subsec:satellite-internet}
-As mentioned in \footnote{https://www.forbes.com/sites/bobodonnell/2019/11/22/real\-world\-5g\-speeds/\#3ec794804f96}, \
-for 5G, the radio wave internet speed is inversely proportional to the distance covered. \
-This means that regular 5G high speed internet will probably be limited to regions densely and medium populated and \
-to research outposts because of infrastructure costs. \
-A valid alternative for sparsely populated areas would be satellite internet. \
-Several US companies have already begun taking steps towards a commercial solution. \
-The most notable player is SpaceX with its project, Starlink, a network of several dozen thousands satellites in lower \
-Earth orbit, in the range of 350\-550 km from Earth, as opposed to the average altitude of \
-1000+ km for satellites in lower earth orbit. \
-According to \footnote{https://www.pcmag.com/news/spacexs\-satellite\-internet\-plans\-for\-mid\-2020\-launch\-in\-the\-us} , \
-the desired average speed is about 1Gbps. \
- \footnote{https://spacenews.com/spacex\-launches\-second\-batch\-of\-starlink\-broadband\-satellites/} \
-mentions that tests with the US military achieved peak speeds of around 610 Mbps, while the network isn't fully \
-functional yet, with thousands of satellites still to be sent to space. \
-The official \href{https://www.starlink.com/}{Starlink} website it expects to reach coverage for northern US and \
-Canada by 2020, and for the rest of the world by 2021.\
-Other companies, including Amazon and OneWeb, have started work on deploying their own internet satellite network.
+% todo: ml/neural networks
+\subsection{MicroProcessors}
+\label{subsec:introduction-microprocessors}
+Another area that has exploded in recent times is that of \
+microprocessors.
+Initially used for hardware development, the development and \
+diversification of microprocessors has lead the rise of IOT.
+Currently there is a wide range of microprocessors available, from \
+language specific processors (like micro:bit and pyboard for Python, \
+Arduino for C), \
+to FPGAs, to cheap micro-processors running full OSes (raspberry pi, odroid) \
+to high-end high-price microprocessors with embedded GPUs, \
+like NVIDIA Jetson AGX.
 
 \subsection{Motivation}
 \label{subsec:introduction-motivation}
 With the rise of 5G internet and satellite-based internet, it will be increasingly easier to stream real-time data \
-from one place in the world to another place on the opposite side. \
-One use case for this increase in speed is the development of commercial drones controlled remotely over the internet.\
+from one place in the world to another place on the opposite side.
+One use case for this increase in speed is the development of commercial drones controlled remotely over the internet.
 With 5G's speed, bandwidth and latency, it will be possible for a robot to transmit in virtually real-time audio-video \
 data to a remote operator and to receive control commands from that operator.
 
@@ -115,15 +132,15 @@ data to a remote operator and to receive control commands from that operator.
     \caption{High Level Overview}
 \end{figure}
 
-This use case can be extended to autonomous robots. \
-Instead of adding considerable computation capabilities to a robot (CPU, memory, GPU)oos that it can run an AI, the \
+This use case can be extended to autonomous robots.
+Instead of adding considerable computation capabilities to a robot (CPU, memory, GPU) so that it can run an AI, the \
 robot could be fitted with minimal hardware designed only to transmit audio-video and receive commands from an AI that \
-runs in the cloud. \
+runs in the cloud.
 This way, if any malfunction occurs on the robot, the equipment could be easily replaced with lower costs because the \
-equipment used was a lot cheaper than it would have been if hardware had to run the AI . \
+equipment used was a lot cheaper than it would have been if the hardware had to run the AI .
 Another option would be to use dedicated hardware that puts an emphasis on durability and can properly function in \
-a wide range of conditions (rain, extreme low/high temperatures). \
-Additionally, this type of setup would also use less energy in order to run, thus extending battery life and allowing \
-higher autonomy.
+a wide range of conditions (rain, extreme low/high temperatures).
+Additionally, moving resources from a robot to the cloud would lead to less used energy in order to run, thus \
+extending battery life and allowing higher autonomy.
 
 
