@@ -754,7 +754,7 @@ After having run some performance tests, I discovered that the neural \
 network offers similar performance to images sized 600x600 to images \
 sized 300x300.
 For this reason, the outer comms will cut a center rectangle of \
-size 600x600 from each image and only transmit that rectangle. % todo: this
+size 480x480 from each image and only transmit that rectangle. % todo: this
 During implementation I also found that tensorflow-gpu uses \
 lazy-loading for GPU(more specifically, NVIDIA) libraries.
 Because of this, when the object detection algorithm is applied \

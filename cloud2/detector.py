@@ -83,12 +83,12 @@ class ImageProcessor:
 
     def initialize_detector(self):
         test_image = cv2.imread('husky.jpg')
-        try:
-            self.odapi.process_frame(test_image)
-            pass
-        except Exception:
-            traceback.print_exc()
-            exit(1)
+        # try:
+        #     self.odapi.process_frame(test_image)
+        #     pass
+        # except Exception:
+        #     traceback.print_exc()
+        #     exit(1)
 
     def start_record(self):
         if os.path.isfile('outpy.avi'):

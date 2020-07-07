@@ -80,26 +80,28 @@ export class ControlComponent implements OnInit {
   }
 
   startTracking() {
+    this.activeTracking = true;
     console.log('Start tracking');
     this.cloudSocketService.startTracking();
   }
 
   stopTracking() {
+    this.activeTracking = false;
     console.log('Stop tracking');
     this.cloudSocketService.stopTracking();
   }
 
   startRecording() {
+    this.activeRecording = true;
     console.log('Start recording');
     this.cloudSocketService.startRec();
   }
 
   stopRecording() {
+    this.activeRecording = false;
     console.log('Stop recording');
     this.cloudSocketService.stopRec();
   }
-
-
 
   private sendCommand() {
     this.cloudSocketService.sendCommand(this.acceleration, this.direction);

@@ -7,23 +7,36 @@ import {DroneComms} from './inner-comms';
 
 const debug = Debug('app');
 // const SERVER_IP = '192.168.0.122';
-const UDP_SERVER = '35.234.90.125';
-const HTTP_SERVER = '35.198.170.255';
+const SERVER = '192.168.0.241';
 const socket = dgram.createSocket('udp4');
 const devicePort = 0;
-const ioSocket = io(`http://${HTTP_SERVER}:8080`);
+const ioSocket = io(`http://${SERVER}:8080`);
 const cap = new cv.VideoCapture(devicePort);
+let frame = cap.read();
+
+const imageHeight = frame.sizes[0];
+const imageWidth = frame.sizes[1];
+const desiredSize = imageHeight < imageWidth ? imageHeight : imageWidth;
+
+const widthMiddle = imageWidth / 2 - desiredSize / 2;
+const heightMiddle = imageHeight / 2 - desiredSize / 2;
 
 function sendImage() {
     debug('start');
-    let frame = cap.read();
+    frame = cap.read();
     debug('read image');
-    const data = cv.imencode('.jpeg', frame);
+
+    let newFrame = frame.getRegion(new cv.Rect(
+        widthMiddle,
+        heightMiddle,
+        desiredSize, desiredSize));
+
+    const data = cv.imencode('.jpeg', newFrame);
     debug('encoded image');
     const udpPacks = UdpPacker.pack(data);
     debug('packed data');
     for (let idx=0; idx < udpPacks.length; idx++) {
-        socket.send(udpPacks[idx].getBuffer(), 5000, UDP_SERVER, (err, bytes) => {
+        socket.send(udpPacks[idx].getBuffer(), 5000, SERVER, (err, bytes) => {
             // if (err) {
             //     console.error('got error', err);
             // }
@@ -38,7 +51,7 @@ function sendImage() {
 DroneComms.getComms().then(comms => {
     setInterval(sendImage, 150);
 
-    ioSocket.on('control', (msg: any) => {
+    ioSocket.on('drone-control', (msg: any) => {
         msg = JSON.parse(msg);
         console.log('Control message', msg);
         comms.sendMessage('engine', msg, 1)

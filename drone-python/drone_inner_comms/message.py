@@ -36,11 +36,11 @@ class EngineMessage:
 
         acc = message['acceleration']
         if acc < 0:
-            acc = 0.1 * acc - 0.2
+            acc = 0.1 * acc
         elif acc > 0:
-            acc = 0.2 + 0.1 * acc
+            acc = 0.1 * acc
 
-        direction = message['direction']
+        direction = message['direction'] * 0.1
 
         # if ('action' not in parsed_message) or ('value' not in parsed_message):
         #     raise CommsException("Message is missing keys")

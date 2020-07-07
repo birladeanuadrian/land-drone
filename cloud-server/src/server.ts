@@ -130,10 +130,10 @@ ioServer.on('connection', (socket: SocketIO.Socket) => {
 
 function stopRecording(socket: Socket) {
     console.log('stop recording');
-    http.get('http://localhost:3000/stop-record', res => {
-        res.on('error', err => {
-            console.error('Error', err);
-        });
+    const request = http.get('http://localhost:3000/stop-record', res => {
         console.log('Response', res.statusCode, res.read());
-    })
+    });
+    request.on('error', err => {
+        console.error('Error encountered', err);
+    });
 }
