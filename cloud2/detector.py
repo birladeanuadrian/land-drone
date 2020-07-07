@@ -7,20 +7,9 @@ from image_transmitter import ImageTransmitter
 import cv2
 import time
 import traceback
+import os
 
 CLOUD_SERVER_SECRET = 'secret'
-
-# todo: maybe uncomment lines below
-# gpus = tf.config.experimental.list_physical_devices('GPU')
-# if gpus:
-#     try:
-#         for gpu in gpus:
-#             print('Process GPU', gpu)
-#             tf.config.experimental.set_virtual_device_configuration(
-#                 gpu,
-#                 [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=13312)])
-#     except RuntimeError as e:
-#         print(e)
 
 
 class DetectorAPI:
@@ -90,6 +79,7 @@ class ImageProcessor:
         self.track_people = False
         self.record = False
         self.image_transmitter = ImageTransmitter()
+        self.writer = None
 
     def initialize_detector(self):
         test_image = cv2.imread('husky.jpg')
@@ -101,10 +91,17 @@ class ImageProcessor:
             exit(1)
 
     def start_record(self):
-        pass
+        if os.path.isfile('outpy.avi'):
+            os.unlink('outpy.avi')
+        self.writer = cv2.VideoWriter('outpy.avi',
+                                      cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'),
+                                      10,
+                                      (480, 480))
+        self.record = True
 
     def stop_record(self):
-        pass
+        self.record = False
+        self.writer.release()
 
     def run(self):
         self.initialize_detector()
@@ -120,6 +117,14 @@ class ImageProcessor:
                 jpeg_buffer = self.process_image(jpeg_buffer)
                 now2 = int(time.time() * 1000)
                 delta_proc = now2 - now
+
+            if self.record:
+
+                np_arr = np.fromstring(jpeg_buffer, np.uint8)
+                # cv_image = cv2.imdecode(np_arr, cv2.IMREAD_GRAYSCALE)
+                mat = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+                print('Size', mat.shape)
+                self.writer.write(mat)
             self.image_transmitter.transmit_image(jpeg_buffer, ts_drone_send)
 
 

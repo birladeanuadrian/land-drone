@@ -85,5 +85,9 @@ export class CloudSocketService {
 
   stopRec() {
     this.socket.emit('stop-rec');
+    const downloadUrl = environment.ioServer + 'download-video';
+    setTimeout(() => {
+      window.open(downloadUrl, '_blank');
+    }, 1000);
   }
 }

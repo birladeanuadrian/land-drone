@@ -17,18 +17,22 @@ class WebApi(Thread):
     def track_people(self):
         print('Start Tracking', flush=True)
         self.image_processor.track_people = True
+        return 'Ok'
 
     def stop_track_people(self):
         print('Stop tracking', flush=True)
         self.image_processor.track_people = False
+        return 'Ok'
 
     def start_record(self):
         print('Start Record', flush=True)
         self.image_processor.start_record()
+        return 'Ok'
 
     def stop_record(self):
         print('Stop Record', flush=True)
         self.image_processor.stop_record()
+        return 'Ok'
 
     def run(self) -> None:
         self.app.run('127.0.0.1', 3000)
