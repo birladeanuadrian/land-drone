@@ -94,6 +94,9 @@ ioServer.on('connection', (socket: SocketIO.Socket) => {
     });
 
     socket.on('start-rec', () => {
+        if (!amActive) {
+            return;
+        }
         console.log('start recording');
         http.get('http://localhost:3000/start-record', res => {
             res.on('error', err => {
@@ -104,10 +107,16 @@ ioServer.on('connection', (socket: SocketIO.Socket) => {
     });
 
     socket.on('stop-rec', () => {
+        if (!amActive) {
+            return;
+        }
         stopRecording(socket);
     });
 
     socket.on('start-track', () => {
+        if (!amActive) {
+            return;
+        }
         console.log('start track');
         http.get('http://localhost:3000/start-tracking', res => {
             res.on('error', err => {
@@ -118,6 +127,9 @@ ioServer.on('connection', (socket: SocketIO.Socket) => {
     });
 
     socket.on('stop-track', () => {
+        if (!amActive) {
+            return;
+        }
         console.log('stop track');
         http.get('http://localhost:3000/stop-tracking', res => {
             res.on('error', err => {

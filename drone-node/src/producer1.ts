@@ -7,7 +7,8 @@ import {DroneComms} from './inner-comms';
 
 const debug = Debug('app');
 // const SERVER_IP = '192.168.0.122';
-const SERVER = '192.168.0.241';
+// const SERVER = '192.168.0.241';
+const SERVER = '34.107.14.190';
 const socket = dgram.createSocket('udp4');
 const devicePort = 0;
 const ioSocket = io(`http://${SERVER}:8080`);
@@ -49,7 +50,7 @@ function sendImage() {
 }
 
 DroneComms.getComms().then(comms => {
-    setInterval(sendImage, 150);
+    setInterval(sendImage, 120);
 
     ioSocket.on('drone-control', (msg: any) => {
         msg = JSON.parse(msg);
