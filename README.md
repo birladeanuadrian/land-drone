@@ -4,7 +4,7 @@ A high-level diagram can be found in the image below:
 
 ![alt text](./doc/img/deployment.PNG)
 
-
+## Active folders
 The Angular application can be found in the folder `test-image-viewer`. 
 
 The nginx configuration can be found in the folder `cloud-server/nginx-config` 
@@ -20,3 +20,7 @@ the program for controlling the drone engine.
 
 Altough not shown in this image, the folder `udp-packer` contains an 
 npm module for packing and unpacking images.
+
+## To ignore
+The folders `face-recognition-opencv`, `face_detection`, `person-detector` 
+prototypes for person detection.
